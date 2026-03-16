@@ -16,7 +16,7 @@ proc newGoveeSocket*(localIp: string): GoveeSocket =
 
   var socket = newSocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
   socket.setSockOpt(OptReuseAddr, true)
-  socket.bindAddr(Port(G_MCAST_PORT), result.localIp)
+  socket.bindAddr(Port(G_LISTEN_PORT), result.localIp)
 
   let localAddr = parseIpAddress(result.localIp)
   var raw = localAddr.address_v4
