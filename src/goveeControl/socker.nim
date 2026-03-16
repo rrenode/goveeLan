@@ -1,18 +1,6 @@
 import std/[net, nativesockets, json, times, winlean, os]
 
-type
-  Controller* = object
-    localIp*: string
-    mcastIp*: string = "239.255.255.250"
-    mcastPort*: int = 4001
-    listenPort*: int = 4002
-    devicePort*: int = 4003
-    sock*: Socket
-
-  FoundDevice* = object
-    macAddr*: string
-    ipAddr*: string
-    sku*: string
+import models
 
 proc saveDevices*(devs: seq[FoundDevice], path: string) =
   var arr = newJArray()

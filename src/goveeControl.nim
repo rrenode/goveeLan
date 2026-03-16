@@ -1,5 +1,5 @@
-import std/[os, strutils, json]
-import socker, deviceControl
+import std/[os, strutils, json, random, times]
+import goveeControl/[models, socker, deviceControl]
 
 const LOCAL_IP: string = "192.168.1.100"
 const MCAST_IP: string = "239.255.255.250"
@@ -25,7 +25,24 @@ echo "A total of " & $devices.len & " devices were found"
 #echo devices
 
 let light1 = DeviceControl(device:devices[0],controller:ctrl)
+let light2 = DeviceControl(device:devices[1],controller:ctrl)
+let light3 = DeviceControl(device:devices[2],controller:ctrl)
 
 light1.turn(true)
+light2.turn(true)
 
-light1.setColor(GColor(r:30,g:150,b:255))
+proc randClr(): GColor =
+  randomize()
+  let r = rand(0..255)
+  let g = rand(0..255)
+  let b = rand(0..255)
+  return GColor(r:r,g:g,b:b)
+
+let interval = 5.seconds
+let deadline = now() + interval
+
+while now() < deadline:
+  light1.setColor(randClr())
+  sleep(rand(200..800))
+  light2.setColor(randClr())
+  sleep(rand(200..800))
