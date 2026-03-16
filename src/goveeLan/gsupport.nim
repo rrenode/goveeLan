@@ -1,5 +1,5 @@
 import macros
-from std/strutils import toUpperAscii
+from std/strutils import toUpperAscii, parseEnum
 import ./core/arrayutils
 
 proc isSupported*(sku: string): bool
@@ -94,10 +94,15 @@ const G_SUPPORTED_DEVICES = SERIES_H50XX & SERIES_H51XX & SERIES_H60XX & SERIES_
 
 #[Macro Result:
 type
-    DEVICES* = enum
+    const GDEVICES_ENUM* = enum
         H5051,H5071,...H80D1
 ]#
-strEnum(DEVICES, G_SUPPORTED_DEVICES)
+strEnum(GDEVICES_ENUM, G_SUPPORTED_DEVICES)
+
+proc skuToEnum*(sku: string): GDEVICES_ENUM =
+    var d: GDEVICES_ENUM
+    parseEnum(sku, d)
+
 
 proc isSupported*(sku: string): bool =
   toUpperAscii(sku) in G_SUPPORTED_DEVICES
