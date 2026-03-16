@@ -1,0 +1,6 @@
+*.exe
+bin/*
+local/*
+nimble.develop
+nimble.paths
+nimbledeps
