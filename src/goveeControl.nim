@@ -3,7 +3,7 @@
 ## [-] Tools for getting local ip
 ## [-] Wrap for Python
 
-import std/[os, strutils, json, random, times]
+import std/[os, strutils, json, random, times, nativesockets]
 import goveeControl/[models, socker, deviceControl]
 
 const LOCAL_IP: string = "192.168.1.100"
@@ -11,11 +11,15 @@ const MCAST_IP: string = "239.255.255.250"
 const MCAST_PORT: int = 4001
 const LISTEN_PORT: int = 4002
 
+let hostname = getHostname()
+let ip = getHostByName(hostname).addrList[0]
+echo $ip
 
 when isMainModule:
 
-  const DEVICE_PATH: string = "local/devices.json"
+  const DEVICES_SAVE_PATH: string = "local/devices.json"
 
+  # Initialize our controller
   var ctrl: Controller = initController(
     localIp=LOCAL_IP, mcastIp=MCAST_IP, 
     mcastPort=MCAST_PORT, listenPort=LISTEN_PORT
@@ -23,14 +27,14 @@ when isMainModule:
 
   var devices: seq[FoundDevice]
 
-  if fileExists(DEVICE_PATH):
-    devices = loadDevices(DEVICE_PATH)
+  # Can load devices from file to bypass scanning
+  if fileExists(DEVICES_SAVE_PATH):
+    devices = loadDevices(DEVICES_SAVE_PATH)
   else:
     devices = ctrl.discover
-    saveDevices(devices, DEVICE_PATH)
+    saveDevices(devices, DEVICES_SAVE_PATH)
 
   echo "A total of " & $devices.len & " devices were found"
-  #echo devices
 
   let light1 = DeviceControl(device:devices[0],controller:ctrl)
   let light2 = DeviceControl(device:devices[1],controller:ctrl)
@@ -44,7 +48,7 @@ when isMainModule:
     let r = rand(0..255)
     let g = rand(0..255)
     let b = rand(0..255)
-    return GColor(r:r,g:g,b:b)
+    GColor(r:r,g:g,b:b)
 
   let interval = 5.seconds
   let deadline = now() + interval
