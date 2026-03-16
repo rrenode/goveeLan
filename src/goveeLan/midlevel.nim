@@ -1,21 +1,55 @@
-import std/[json, times]
+import std/[json, times, sequtils]
+from std/net import getPrimaryIPAddr
 
 import ./lowlevel
 
 type
-  GNetDevice* = object
+  GNetDevice* = ref object
     macAddr*: string
     ipAddr*: string
     sku*: string
   
   GController* = ref object
+    netDevices*: seq[GNetDevice]
     transport: GoveeSocket
-  
-proc newGController*(localIp: string): GController =
+
+# Contstructors
+proc newGController*(localIp: string = ""): GController
+proc newGController*(transport: GoveeSocket): GController
+
+# GController Procs
+proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000): seq[GNetDevice]
+
+proc newGController*(localIp: string = ""): GController =
+  ## Creates a controller with its own transport socket.
+  ##
+  ## This is suitable when this controller is the only instance using
+  ## Govee LAN communication on the given local interface.
+  ##
+  ## On some platforms, notably Windows, multiple controllers cannot
+  ## reliably bind separate sockets to the discovery port (4002) on
+  ## the same local IP. In those cases, controllers must share a
+  ## single `GoveeSocket`.
+  ## 
+  ## If you need to share a transport between multiple controllers,
+  ## use `newGController(transport: GoveeSocket)` instead.
+  ## 
+  var lanAddr = localIp
+  if lanAddr == "":
+    lanAddr = $getPrimaryIPAddr()
   new(result)
   result.transport = newGoveeSocket(localIp)
 
 proc newGController*(transport: GoveeSocket): GController =
+  ## Use an existing transport socket.
+  ##
+  ## Note:
+  ## Govee LAN discovery requires a UDP listener on port 4002.
+  ##  If multiple sockets are bound to the same port, the OS may
+  ##    deliver packets to only one of them. 
+  ## Sharing a single GoveeSocket between controllers is 
+  ##    therefore recommended.
+  ## 
   new(result)
   result.transport = transport
 
@@ -53,9 +87,21 @@ proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000)
 
       if not skuModel.isNil and skuModel != "" and skuModel != sku:
         continue
-
+      
       result.add(GNetDevice(
         macAddr:mac,
         ipAddr:ip,
         sku:sku
       ))
+  
+proc turn*(ctrl: GController, d: GNetDevice, on: bool) =
+  let val = if on: 1 else: 0
+  let payload = %*{
+    "msg": {
+      "cmd": "turn",
+      "data": {
+        "value": val
+      }
+    }
+  }
+  ctrl.transport.sendToDevice(d.ipAddr, $payload)
