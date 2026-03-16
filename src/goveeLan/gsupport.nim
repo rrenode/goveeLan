@@ -1,3 +1,4 @@
+import macros
 from std/strutils import toUpperAscii
 import ./core/arrayutils
 
@@ -90,6 +91,13 @@ const SERIES_H8XXX = [
 ]
 
 const G_SUPPORTED_DEVICES = SERIES_H50XX & SERIES_H51XX & SERIES_H60XX & SERIES_H61XXX & SERIES_H66XX & SERIES_H68XX & SERIES_H70XX & SERIES_H71XX & SERIES_H8XXX
+
+#[Macro Result:
+type
+    DEVICES* = enum
+        H5051,H5071,...H80D1
+]#
+strEnum(DEVICES, G_SUPPORTED_DEVICES)
 
 proc isSupported*(sku: string): bool =
   toUpperAscii(sku) in G_SUPPORTED_DEVICES
