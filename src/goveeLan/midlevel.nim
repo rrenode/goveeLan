@@ -20,6 +20,10 @@ proc newGController*(transport: GoveeSocket): GController
 # GController Procs
 proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000): seq[GNetDevice]
 
+proc turn*(ctrl: GController, d: GNetDevice, on: bool)
+proc brightness*(ctrl: GController, d: GNetDevice, val: int)
+
+
 proc newGController*(localIp: string = ""): GController =
   ## Creates a controller with its own transport socket.
   ##
@@ -95,6 +99,7 @@ proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000)
       ))
   
 proc turn*(ctrl: GController, d: GNetDevice, on: bool) =
+  ## For turn, either 0 for off or 1 for on
   let val = if on: 1 else: 0
   let payload = %*{
     "msg": {
@@ -105,3 +110,13 @@ proc turn*(ctrl: GController, d: GNetDevice, on: bool) =
     }
   }
   ctrl.transport.sendToDevice(d.ipAddr, $payload)
+
+proc brightness*(ctrl: GController, d: GNetDevice, val: int) =
+  ## For brightness, Govee wants an integer bound(0, 100)
+  let payload = %*{
+    "msg": {
+      "cmd": "brightness",
+      "data": {"value": val}
+    }
+  }
+  ctrl.transport.sendToDevice(d.ipAddr, %payload)
