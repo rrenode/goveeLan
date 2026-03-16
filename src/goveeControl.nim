@@ -6,43 +6,46 @@ const MCAST_IP: string = "239.255.255.250"
 const MCAST_PORT: int = 4001
 const LISTEN_PORT: int = 4002
 
-const DEVICE_PATH: string = "local/devices.json"
 
-var ctrl: Controller = initController(
-  localIp=LOCAL_IP, mcastIp=MCAST_IP, 
-  mcastPort=MCAST_PORT, listenPort=LISTEN_PORT
-)
+when isMainModule:
 
-var devices: seq[FoundDevice]
+  const DEVICE_PATH: string = "local/devices.json"
 
-if fileExists(DEVICE_PATH):
-  devices = loadDevices(DEVICE_PATH)
-else:
-  devices = ctrl.discover
-  saveDevices(devices, DEVICE_PATH)
+  var ctrl: Controller = initController(
+    localIp=LOCAL_IP, mcastIp=MCAST_IP, 
+    mcastPort=MCAST_PORT, listenPort=LISTEN_PORT
+  )
 
-echo "A total of " & $devices.len & " devices were found"
-#echo devices
+  var devices: seq[FoundDevice]
 
-let light1 = DeviceControl(device:devices[0],controller:ctrl)
-let light2 = DeviceControl(device:devices[1],controller:ctrl)
-let light3 = DeviceControl(device:devices[2],controller:ctrl)
+  if fileExists(DEVICE_PATH):
+    devices = loadDevices(DEVICE_PATH)
+  else:
+    devices = ctrl.discover
+    saveDevices(devices, DEVICE_PATH)
 
-light1.turn(true)
-light2.turn(true)
+  echo "A total of " & $devices.len & " devices were found"
+  #echo devices
 
-proc randClr(): GColor =
-  randomize()
-  let r = rand(0..255)
-  let g = rand(0..255)
-  let b = rand(0..255)
-  return GColor(r:r,g:g,b:b)
+  let light1 = DeviceControl(device:devices[0],controller:ctrl)
+  let light2 = DeviceControl(device:devices[1],controller:ctrl)
+  let light3 = DeviceControl(device:devices[2],controller:ctrl)
 
-let interval = 5.seconds
-let deadline = now() + interval
+  light1.turn(true)
+  light2.turn(true)
 
-while now() < deadline:
-  light1.setColor(randClr())
-  sleep(rand(200..800))
-  light2.setColor(randClr())
-  sleep(rand(200..800))
+  proc randClr(): GColor =
+    randomize()
+    let r = rand(0..255)
+    let g = rand(0..255)
+    let b = rand(0..255)
+    return GColor(r:r,g:g,b:b)
+
+  let interval = 5.seconds
+  let deadline = now() + interval
+
+  while now() < deadline:
+    light1.setColor(randClr())
+    sleep(rand(200..800))
+    light2.setColor(randClr())
+    sleep(rand(200..800))
