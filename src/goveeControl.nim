@@ -1,3 +1,8 @@
+## TODO:
+## [-] Rework lib
+## [-] Tools for getting local ip
+## [-] Wrap for Python
+
 import std/[os, strutils, json, random, times]
 import goveeControl/[models, socker, deviceControl]
 
