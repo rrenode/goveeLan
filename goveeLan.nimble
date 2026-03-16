@@ -5,7 +5,7 @@ author        = "im_rob"
 description   = "A new thing to exist"
 license       = "MIT"
 srcDir        = "src"
-bin = @["goveeControl"]
+bin = @["goveeLan"]
 
 
 # Dependencies
