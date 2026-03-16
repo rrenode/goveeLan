@@ -1,3 +1,4 @@
+import std/[strutils]
 import ./[midlevel, gsupport, models]
 
 type
@@ -22,6 +23,7 @@ type
     model: GDEVICES_ENUM
     macAddress: string
     netDevice: GNetDevice
+    attached: bool
     client: GClient
 
   ## Client's job is to provide a higher level interface for 
@@ -31,7 +33,11 @@ type
   ## Also acts as a sort of base type.
   ## 
   GClient* = ref object
+    devices: seq[GDevice]
     controller {. requiresInit.}: GController
+
+proc newGDevice(gd: GNetDevice, c: GClient): GDevice
+proc newGDevice(gd: GNetDevice): GDevice
 
 var sharedController: GController
 
@@ -41,33 +47,93 @@ proc getSharedController(): GController =
   sharedController
 
 proc newGClient*(): GClient =
-  result = new(GCLient)
-  result.controller = getSharedController()
+  result = GClient(
+    controller: getSharedController()
+  )
 
 proc dispatch(c: GClient, device: GDevice, data: GCommandData) =
   case data.cmd
   of gTurn:
     c.controller.turn(device.netDevice, bool(data.state))
   of gBrightness:
-    discard
+    c.controller.brightness(device.netDevice, data.brightness)
   of gColorwc:
     discard
   of gStatus:
     discard
 
+proc attachDevice*(c: GClient, d: GDevice) =
+  ## Attach a device to a client
+  d.client = c
+  c.devices.add(d)
+
+proc attachDevices*(c: GClient, devices: seq[GDevice]) =
+  ## Register many devices in the client.
+  for d in devices:
+    c.attachDevice(d)
+
+proc listDevices*(c: GClient): seq[GDevice] =
+  ## Lists attached devices
+  c.devices
+
+proc queryDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T): seq[GDevice] =
+  ## Query attached devices
+  discard
+
+proc discoverDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): seq[GDevice] =
+  ## Discover Govee devices on Lan.
+  ## 
+  ## INFO:
+  ##  \ The resulting GDevices cannot be controlled. 
+  ##   \ They must be attached to a client
+  let netDevices = c.controller.discover($skuModel)
+  for d in netDevices:
+    result.add(newGDevice(d))
+
+proc discoverAttachDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): seq[GDevice] =
+  ## Discover Govee devices on Lan and attach them to the client.
+  ## Returns a seq of newly attached devices.
+  let netDevices = c.controller.discover($skuModel)
+  for nd in netDevices:
+    let d = newGDevice(nd)
+    c.attachDevice(d)
+    result.add(d)
+
+# GDevice - Constructors
+proc newGDevice(gd: GNetDevice, c: GClient): GDevice =
+  new(result)
+  result.netDevice = gd
+  result.client = c
+
+proc newGDevice(gd: GNetDevice): GDevice =
+  new(result)
+  result.netDevice = gd
+
 # GDevice - field getters
 proc model*(d: GDevice): GDEVICES_ENUM =
-  d.model
+  skuToEnum(d.netDevice.sku)
 
 proc macAddress*(d: GDevice): string =
-  d.macAddress
+  d.netDevice.macAddr
+
+proc attached*(d: GDevice): bool =
+  not d.client.isNil
 
 proc dispatch(d: GDevice, data: GCommandData) =
+  if d.client.isNil:
+    raise newException(ValueError, "Device is not attached to a client")
   d.client.dispatch(d, data)
 
-# GDrvice - procs
+# GDevice - procs
 proc turnOn*(d: GDevice) =
   d.dispatch(GCommandData(cmd: gTurn, state: pOn))
 
 proc turnOff*(d: GDevice) =
   d.dispatch(GCommandData(cmd: gTurn, state: pOff))
+
+proc setBrightness*(d: GDevice, val: GBrightness) =
+  d.dispatch(GCommandData(cmd: gBrightness, brightness: val))
+
+# GDevice - std compat
+proc `$`*(d: GDevice): string =
+  "GDevice(model=" & $d.model & ", mac=" & d.macAddress & ")"
