@@ -1,6 +1,7 @@
 type
   GPowerState* = enum
-    pOn, pOff
+    pOff = 0,
+    pOn = 1
 
   Percent* = range[0..100]
 
@@ -13,5 +14,5 @@ type
 
 proc `bool`*(ps: GPowerState): bool =
   case ps:
-  of pOn: true
   of pOff: false
+  of pOn: true
