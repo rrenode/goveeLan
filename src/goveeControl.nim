@@ -1,4 +1,4 @@
-import std/[os, strutils]
+import std/[os, strutils, json]
 import socker, deviceControl
 
 const LOCAL_IP: string = "192.168.1.100"
@@ -25,5 +25,5 @@ echo "A total of " & $devices.len & " devices were found"
 echo devices
 
 let light1 = DeviceControl(device:devices[0],controller:ctrl)
-echo light1
-light1.turn(false)
+echo $light1.status
+light1.toggleOn()

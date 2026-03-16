@@ -1,4 +1,4 @@
-import std/[json]
+import std/[json, net]
 import socker
 type
   Percent = range[0..100]
@@ -32,11 +32,31 @@ proc turn*(d: DeviceControl, on: bool) =
   }
   d.controller.send(d.device.ipAddr, payload)
 
-proc status*(d: DeviceControl) =
+proc status*(d: DeviceControl): JsonNode =
   let payload = %*{
     "msg": {
       "cmd": "devStatus",
       "data": {}
     }
   }
+
   d.controller.send(d.device.ipAddr, payload)
+
+  var
+    data = ""
+    address = ""
+    port: Port
+
+  let n = d.controller.sock.recvFrom(data, 4096, address, port)
+  if n <= 0:
+    raise newException(IOError, "No response received")
+
+  result = parseJson(data)
+
+proc toggleOn*(d: DeviceControl) =
+  let status = d.status
+  let onOff = status["msg"]["data"]["onOff"].getInt
+  if onOff == 1:
+    d.turn(on=false)
+  else:
+    d.turn(on=true)
