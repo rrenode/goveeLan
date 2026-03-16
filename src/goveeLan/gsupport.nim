@@ -1,7 +1,7 @@
 from std/strutils import toUpperAscii
-import core/arrayutils
+import ./core/arrayutils
 
-proc isSupported(sku: string): bool
+proc isSupported*(sku: string): bool
 
 const SERIES_H50XX = [
     "H5051","H5071","H5080","H5081","H5082","H5083",
