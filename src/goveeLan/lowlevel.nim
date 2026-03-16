@@ -15,6 +15,8 @@ proc newGoveeSocket*(localIp: string): GoveeSocket =
   result.localIp = localIp
 
   var socket = newSocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+  doAssert socket != nil, "newSocket failed"
+
   socket.setSockOpt(OptReuseAddr, true)
   socket.bindAddr(Port(G_LISTEN_PORT), result.localIp)
 
@@ -23,15 +25,21 @@ proc newGoveeSocket*(localIp: string): GoveeSocket =
   discard winlean.setsockopt(
     socket.getFd(),
     cint(IPPROTO_IP),
-    cint(9),
+    cint(9), # TODO: This only works for Windows
     cast[pointer](addr raw),
     SockLen(sizeof(raw))
   )
   result.sock = socket
+  doAssert result.sock != nil, "result.sock not set"
 
 proc close*(g: GoveeSocket) =
   if g != nil:
     g.sock.close()
+
+proc sendTo*(
+  g: GoveeSocket, ip: string, port: int, payload: string
+) {.tags: [WriteIOEffect].} =
+  net.sendTo(g.sock, $ip, Port(port), payload)
 
 proc sendToDevice*[T: string | IpAddress](
   g: GoveeSocket, ip: T, payload: string
@@ -41,14 +49,12 @@ proc sendToDevice*[T: string | IpAddress](
 proc sendToDevice*[T: string | IpAddress](
   g: GoveeSocket, ip: T, payload: JsonNode
 ) {.tags: [WriteIOEffect].} =
-  g.sendTo(ip, $payload)
+  g.sendTo(ip, G_DEVICE_PORT, $payload)
 
-proc sendTo*[T: string | IpAddress](
-  g: GoveeSocket, ip: T, port: int, payload: string
-) {.tags: [WriteIOEffect].} =
-  net.sendTo(g.sock, $ip, Port(port), $payload)
+proc sendMCast*(g: GoveeSocket, payload: string) =
+  g.sendTo(G_MCAST_IP, G_MCAST_PORT, payload)
 
-proc sendMCast*[T: string | JsonNode](g: GoveeSocket, payload: T) =
+proc sendMCast*(g: GoveeSocket, payload: JsonNode) =
   g.sendTo(G_MCAST_IP, G_MCAST_PORT, $payload)
 
 proc recvFrom*(g: GoveeSocket, data: var string, ip: var string, port: var Port): int =
