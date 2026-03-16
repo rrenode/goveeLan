@@ -22,8 +22,10 @@ else:
   saveDevices(devices, DEVICE_PATH)
 
 echo "A total of " & $devices.len & " devices were found"
-echo devices
+#echo devices
 
 let light1 = DeviceControl(device:devices[0],controller:ctrl)
-echo $light1.status
-light1.toggleOn()
+
+light1.turn(true)
+
+light1.setColor(GColor(r:30,g:150,b:255))

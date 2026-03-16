@@ -1,4 +1,4 @@
-import std/[json, net]
+import std/[json, net, strutils]
 import socker
 type
   Percent = range[0..100]
@@ -20,6 +20,9 @@ type
     color*: GColor
     temp*: GTemp
 
+proc send*(d: DeviceControl, payload: JsonNode) =
+  d.controller.send(d.device.ipAddr, payload)
+
 proc turn*(d: DeviceControl, on: bool) =
   let val = if on: 1 else: 0
   let payload = %*{
@@ -30,7 +33,7 @@ proc turn*(d: DeviceControl, on: bool) =
       }
     }
   }
-  d.controller.send(d.device.ipAddr, payload)
+  d.send(payload)
 
 proc status*(d: DeviceControl): JsonNode =
   let payload = %*{
@@ -40,7 +43,7 @@ proc status*(d: DeviceControl): JsonNode =
     }
   }
 
-  d.controller.send(d.device.ipAddr, payload)
+  d.send(payload)
 
   var
     data = ""
@@ -60,3 +63,44 @@ proc toggleOn*(d: DeviceControl) =
     d.turn(on=false)
   else:
     d.turn(on=true)
+
+proc setBrightness(d: DeviceControl, b: GBrightness) =
+  let payload = %*{
+    "msg": {
+      "cmd": "brightness",
+      "data": {"value": b}
+    }
+  }
+  d.send(payload)
+
+proc setTemp*(d: DeviceControl, temp: GTemp) =
+  let payload = %*{
+    "msg":{
+      "cmd":"colorwc",
+        "data":{
+          "color":{
+            "r":0,
+            "g":12,
+            "b":8
+          },
+          "colorTemInKelvin":temp
+      }
+    }
+  }
+  d.send(payload)
+
+proc setColor*(d: DeviceControl, clr: GColor) =
+  let payload = %*{
+      "msg":{
+          "cmd":"colorwc",
+          "data":{
+          "color":{
+              "r":clr.r,
+              "g":clr.g,
+              "b":clr.b
+          },
+          "colorTemInKelvin":0
+          }
+      }
+  }
+  d.send(payload)
