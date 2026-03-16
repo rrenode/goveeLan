@@ -33,16 +33,39 @@ proc close*(g: GoveeSocket) =
   if g != nil:
     g.sock.close()
 
-proc sendTo*[T: string | IpAddress](
+proc sendToDevice*[T: string | IpAddress](
   g: GoveeSocket, ip: T, payload: string
 ) {.tags: [WriteIOEffect].} =
   net.sendTo(g.sock, $ip, Port(G_DEVICE_PORT), $payload)
 
-proc sendTo*[T: string | IpAddress](
+proc sendToDevice*[T: string | IpAddress](
   g: GoveeSocket, ip: T, payload: JsonNode
 ) {.tags: [WriteIOEffect].} =
   g.sendTo(ip, $payload)
 
+proc sendTo*[T: string | IpAddress](
+  g: GoveeSocket, ip: T, port: int, payload: string
+) {.tags: [WriteIOEffect].} =
+  net.sendTo(g.sock, $ip, Port(port), $payload)
+
+proc sendMCast*[T: string | JsonNode](g: GoveeSocket, payload: T) =
+  g.sendTo(G_MCAST_IP, G_MCAST_PORT, $payload)
+
 proc recvFrom*(g: GoveeSocket, data: var string, ip: var string, port: var Port): int =
+  g.sock.recvFrom(data, 4096, ip, port)
+
+proc recvFrom*(g: GoveeSocket, data: var string, ip: var string, port: var string): int =
   ##
-  result = g.sock.recvFrom(data, 4096, ip, port)
+  var p: Port
+  result = g.sock.recvFrom(data, 4096, ip, p)
+  port = $p
+
+proc getFd*(g: GoveeSocket): SocketHandle =
+  g.sock.getFd()
+
+proc selectRead*(readfds: var seq[SocketHandle], timeout = 500): int =
+  nativesockets.selectRead(readfds, timeout)
+
+proc selectRead*(g: GoveeSocket, timeout = 500): int =
+  var fds = @[g.getFd()]
+  nativesockets.selectRead(fds, timeout)
