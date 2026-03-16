@@ -1,6 +1,5 @@
 import std/[json]
-from socker import FoundDevice, Controller
-
+import socker
 type
   Percent = range[0..100]
 
@@ -12,8 +11,8 @@ type
     b*: int
 
   DeviceControl* = object
-    device: FoundDevice
-    controller: Controller
+    device*: FoundDevice
+    controller*: Controller
   
   DeviceStatus* = object
     on*: bool
@@ -21,5 +20,23 @@ type
     color*: GColor
     temp*: GTemp
 
-proc status(d: DeviceControl) =
-  discard 
+proc turn*(d: DeviceControl, on: bool) =
+  let val = if on: 1 else: 0
+  let payload = %*{
+    "msg": {
+      "cmd": "turn",
+      "data": {
+        "value": val
+      }
+    }
+  }
+  d.controller.send(d.device.ipAddr, payload)
+
+proc status*(d: DeviceControl) =
+  let payload = %*{
+    "msg": {
+      "cmd": "devStatus",
+      "data": {}
+    }
+  }
+  d.controller.send(d.device.ipAddr, payload)

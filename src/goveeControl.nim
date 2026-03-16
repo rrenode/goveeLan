@@ -1,5 +1,5 @@
 import std/[os, strutils]
-import socker
+import socker, deviceControl
 
 const LOCAL_IP: string = "192.168.1.100"
 const MCAST_IP: string = "239.255.255.250"
@@ -23,3 +23,7 @@ else:
 
 echo "A total of " & $devices.len & " devices were found"
 echo devices
+
+let light1 = DeviceControl(device:devices[0],controller:ctrl)
+echo light1
+light1.turn(false)

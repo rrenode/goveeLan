@@ -6,6 +6,7 @@ type
     mcastIp*: string = "239.255.255.250"
     mcastPort*: int = 4001
     listenPort*: int = 4002
+    devicePort*: int = 4003
     sock*: Socket
 
   FoundDevice* = object
@@ -35,9 +36,12 @@ proc loadDevices*(path: string): seq[FoundDevice] =
       sku: n["sku"].getStr
     )
 
-proc initController*(localIp: string, mcastIp: string = "239.255.255.250", mcastPort: int = 4001, listenPort: int = 4002): Controller =
+proc initController*(localIp: string, mcastIp: string = "239.255.255.250", mcastPort: int = 4001, listenPort: int = 4002, devicePort: int = 4003): Controller =
   result.localIp = localIp
   result.listenPort = listenPort
+  result.mcastIp = mcastIp
+  result.mcastPort = mcastPort
+  result.devicePort = devicePort
 
   var socket = newSocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
   socket.setSockOpt(OptReuseAddr, true)
@@ -97,5 +101,5 @@ proc discover*(ctrl: Controller, skuModel: string = "", timeout_ms: int = 5000):
         sku:sku
       ))
 
-proc send(ctrl: Controller, ip: string, payload: JsonNode) =
-  net.sendTo(ctrl.sock, ctrl.mcastIp, Port(ctrl.mcastPort), $payload)
+proc send*(ctrl: Controller, ip: string, payload: JsonNode) =
+  net.sendTo(ctrl.sock, ip, Port(ctrl.devicePort), $payload)
