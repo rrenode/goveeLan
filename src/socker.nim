@@ -1,4 +1,4 @@
-import std/[net, nativesockets, json, times, winlean]
+import std/[net, nativesockets, json, times, winlean, os]
 
 type
   Controller* = object
@@ -6,19 +6,44 @@ type
     mcastIp*: string = "239.255.255.250"
     mcastPort*: int = 4001
     listenPort*: int = 4002
+    sock*: Socket
 
   FoundDevice* = object
     macAddr*: string
     ipAddr*: string
     sku*: string
 
-proc discover(ctrl: Controller, skuModel: string, timeout_ms: int): seq[FoundDevice] =
+proc saveDevices*(devs: seq[FoundDevice], path: string) =
+  var arr = newJArray()
+
+  for d in devs:
+    arr.add(%*{
+      "mac": d.macAddr,
+      "ip": d.ipAddr,
+      "sku": d.sku
+    })
+
+  writeFile(path, $arr)
+
+proc loadDevices*(path: string): seq[FoundDevice] =
+  let j = parseJson(readFile(path))
+
+  for n in j:
+    result.add FoundDevice(
+      macAddr: n["mac"].getStr,
+      ipAddr: n["ip"].getStr,
+      sku: n["sku"].getStr
+    )
+
+proc initController*(localIp: string, mcastIp: string = "239.255.255.250", mcastPort: int = 4001, listenPort: int = 4002): Controller =
+  result.localIp = localIp
+  result.listenPort = listenPort
 
   var socket = newSocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
   socket.setSockOpt(OptReuseAddr, true)
-  socket.bindAddr(Port(ctrl.listenPort), ctrl.localIp)
+  socket.bindAddr(Port(result.listenPort), result.localIp)
 
-  let localAddr = parseIpAddress(ctrl.localIp)
+  let localAddr = parseIpAddress(result.localIp)
   var raw = localAddr.address_v4
   discard winlean.setsockopt(
     socket.getFd(),
@@ -27,6 +52,9 @@ proc discover(ctrl: Controller, skuModel: string, timeout_ms: int): seq[FoundDev
     cast[pointer](addr raw),
     SockLen(sizeof(raw))
   )
+  result.sock = socket
+
+proc discover*(ctrl: Controller, skuModel: string = "", timeout_ms: int = 5000): seq[FoundDevice] =
 
   let payload = %*{
       "msg": {
@@ -37,7 +65,7 @@ proc discover(ctrl: Controller, skuModel: string, timeout_ms: int): seq[FoundDev
       }
   }
 
-  net.sendTo(socket, ctrl.mcastIp, Port(ctrl.mcastPort), $payload)
+  net.sendTo(ctrl.sock, ctrl.mcastIp, Port(ctrl.mcastPort), $payload)
 
   let start = epochTime()
 
@@ -49,18 +77,18 @@ proc discover(ctrl: Controller, skuModel: string, timeout_ms: int): seq[FoundDev
   let deadline = epochTime() + float(timeout_ms) / 1000.0
 
   while epochTime() < deadline:
-    var fds = @[socket.getFd()]
+    var fds = @[ctrl.sock.getFd()]
     let remainingMs = int(max(0.0, (deadline - epochTime()) * 1000.0))
 
     if selectRead(fds, remainingMs) > 0:
-      let n = socket.recvFrom(data, 4096, address, port)
+      let n = ctrl.sock.recvFrom(data, 4096, address, port)
       #echo "R: ", n, " ", address, ":", port, " ", data
       let jdata = parseJson(data)
       let sku = jdata["msg"]["data"]["sku"].getStr
       let ip  = jdata["msg"]["data"]["ip"].getStr
       let mac = jdata["msg"]["data"]["device"].getStr
 
-      if not skuModel.isNil and skuModel != sku:
+      if not skuModel.isNil and skuModel != "" and skuModel != sku:
         continue
 
       result.add(FoundDevice(
@@ -68,3 +96,6 @@ proc discover(ctrl: Controller, skuModel: string, timeout_ms: int): seq[FoundDev
         ipAddr:ip,
         sku:sku
       ))
+
+proc send(ctrl: Controller, ip: string, payload: JsonNode) =
+  net.sendTo(ctrl.sock, ctrl.mcastIp, Port(ctrl.mcastPort), $payload)
