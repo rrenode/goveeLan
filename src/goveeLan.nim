@@ -68,12 +68,19 @@
 
 when isMainModule:
   # Really just used for development...
-  import goveeLan/[highlevel]
+  import goveeLan/[highlevel, models]
 
   proc cTest() =
     let c = newGClient()
     let ds = c.discoverAttachDevices()
-
+    let light1 = ds[0]
+    echo light1
+    echo light1.attached
+    c.detachDevice(light1)
+    echo light1
+    echo light1.attached
+    c.attachDevice(light1)
+    echo light1.attached
   cTest()
 
 else:
