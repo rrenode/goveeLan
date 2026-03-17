@@ -32,7 +32,31 @@ type
     ## **Constructor:** [newGClient]
     ## 
     ## Higher level interface of [GController] 
-    ##    interacting and controlling Govee devices.
+    ##    for interacting and controlling Govee devices.
+    ## 
+    ## GClient is a session/view over a shared transport layer 
+    ## and as such GClient instances are not independent by default.
+    ## This comes from a limitation placed by certain OS's (particularly Windows) 
+    ## where binding another socket to the same address/port is rejected. 
+    ## This is partially the fault of my own ignorance when designing the API 
+    ## so I am open to changes, suggestions, and complaints.
+    ## 
+    ## 
+    ## .. raw:: html
+    ##    </script>
+    ##    <details style="border: 1px solid #ccc; border-radius: 6px; padding: 0.5em; margin-right: .5em;">
+    ##      <summary style="cursor: pointer; font-weight: bold;">
+    ##        [Show More] If you need an independent GClient...
+    ##      </summary>
+    ## 
+    ##      <div style="margin-top: 0.5em;">
+    ##        You can either use the lower level interfaces from 
+    ##        <a href="./lowlevel.html">lowlevel</a> and 
+    ##        <a href="./midlevel.html">midlevel</a> OR
+    ##        use the <a href="#newIsolatedGClient%2CGController">newIsolatedGClient</a> 
+    ##        GClient constructor.
+    ##      </div>
+    ##    </details>
     ## 
     ## A GDevice can only be attached to one client.
     ## 
@@ -61,6 +85,12 @@ proc newGClient*(): GClient =
   result = GClient(
     devices: initTable[string, GDevice](),
     controller: getSharedController()
+  )
+
+proc newIsolatedGClient*(controller: GController): GClient =
+  result = GClient(
+    devices: initTable[string, GDevice](),
+    controller: controller
   )
 
 proc dispatch(c: GClient, device: GDevice, data: GCommandData) =
