@@ -1,4 +1,3 @@
-import macros
 from std/strutils import toUpperAscii, parseEnum
 import ./core/arrayutils
 
