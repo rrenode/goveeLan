@@ -1,3 +1,11 @@
+## .. danger:: 
+##      Do not treat this channel as secure against other hosts on the local network.
+##    
+##      This library uses Govee’s LAN UDP protocol. 
+##      
+##      Commands are sent as unauthenticated UDP JSON to device port 4003 per Govee's LAN docs. 
+## 
+
 import std/[net, nativesockets, json, times, winlean, os]
 
 const G_MCAST_IP = "239.255.255.250"
@@ -7,7 +15,7 @@ const G_DEVICE_PORT = 4003
 
 type
   ProtocolError* = object of CatchableError
-  
+
   GoveeSocket* = ref object
     localIp: string
     sock: Socket
