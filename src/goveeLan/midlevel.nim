@@ -89,7 +89,7 @@ proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000)
       let ip  = jdata["msg"]["data"]["ip"].getStr
       let mac = jdata["msg"]["data"]["device"].getStr
 
-      if not skuModel.isNil and skuModel != "" and skuModel != sku:
+      if skuModel != "" and skuModel != sku:
         continue
       
       result.add(GNetDevice(
@@ -159,7 +159,7 @@ proc color*(ctrl: GController; d: GNetDevice; r, g, b: int) =
   }
   ctrl.transport.sendToDevice(d.ipAddr, payload)
 
-proc status*(ctrl: GController; d:GNetDevice): JsonNode =
+proc status*(ctrl: GController; d:GNetDevice, timeout_ms: int = 500): JsonNode =
   let payload = %*{
     "msg": {
       "cmd": "devStatus",
@@ -172,6 +172,10 @@ proc status*(ctrl: GController; d:GNetDevice): JsonNode =
     data = ""
     address = ""
     port = ""
+
+  var fds = @[ctrl.transport.getFd()]
+  if selectRead(fds, timeout_ms)
+    raise newException(IOError, "Timed out waiting for device status response")
 
   let n = ctrl.transport.recvFrom(data=data, ip=address, port=port)
   if n <= 0:
