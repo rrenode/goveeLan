@@ -66,12 +66,17 @@
 ## See [GDevice] for more with devices.
 ## 
 
+when isMainModule:
+  # Really just used for development...
+  import goveeLan/[highlevel]
 
-import goveeLan/[highlevel, models]
+  proc cTest() =
+    let c = newGClient()
+    let ds = c.discoverAttachDevices()
 
-export highlevel, models
+  cTest()
 
-proc cTest() =
-  let c = newGClient()
-  let ds = c.discoverAttachDevices()
-cTest()
+else:
+  import goveeLan/[highlevel, models]
+
+  export highlevel, models
