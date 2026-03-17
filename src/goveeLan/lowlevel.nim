@@ -6,6 +6,8 @@ const G_LISTEN_PORT = 4002
 const G_DEVICE_PORT = 4003
 
 type
+  ProtocolError* = object of CatchableError
+  
   GoveeSocket* = ref object
     localIp: string
     sock: Socket
