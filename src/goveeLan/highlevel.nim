@@ -81,10 +81,6 @@ proc listDevices*(c: GClient): seq[GDevice] =
   ## Lists attached devices
   c.devices
 
-proc queryDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T): seq[GDevice] =
-  ## Query attached devices
-  discard
-
 proc discoverDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): seq[GDevice] =
   ## Discover Govee devices on Lan.
   ## 
