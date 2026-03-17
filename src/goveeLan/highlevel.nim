@@ -1,5 +1,5 @@
 ## .. importdoc:: midlevel.nim
-
+import std/[tables, sequtils]
 import ./[midlevel, gsupport, models]
 
 type
@@ -34,6 +34,8 @@ type
     ## Higher level interface of [GController] 
     ##    interacting and controlling Govee devices.
     ## 
+    ## A GDevice can only be attached to one client.
+    ## 
     ## 
     ## | procs                   | desc                              |
     ## | ----------------------- | --------------------------------- |
@@ -43,7 +45,7 @@ type
     ## | [attachDevices]         | Attach a seq of [GDevice]'s to client |
     ## | [listDevices]           | Lists attached devices |
     ## 
-    devices: seq[GDevice]
+    devices: Table[string, GDevice]
     controller {. requiresInit.}: GController
 
 proc newGDevice(gd: GNetDevice, c: GClient): GDevice
@@ -58,6 +60,7 @@ proc getSharedController(): GController =
 
 proc newGClient*(): GClient =
   result = GClient(
+    devices: initTable[string, GDevice](),
     controller: getSharedController()
   )
 
@@ -78,8 +81,16 @@ proc dispatch(c: GClient, device: GDevice, data: GCommandData) =
 
 proc attachDevice*(c: GClient, d: GDevice) =
   ## Attach a device to a client
-  d.client = c
-  c.devices.add(d)
+  if c.devices.hasKey(d.macAddress):
+    let existing = c.devices[d.macAddress]
+    if existing == d:
+      return
+    else:
+      raise newException(ValueError, "Duplicate device attempt with MAC: " & d.macAddress)
+  else:
+    c.devices[d.macAddress] = d
+    d.client = c
+    d.attached = true
 
 proc attachDevices*(c: GClient, devices: seq[GDevice]) =
   ## Register many devices in the client.
@@ -88,7 +99,7 @@ proc attachDevices*(c: GClient, devices: seq[GDevice]) =
 
 proc listDevices*(c: GClient): seq[GDevice] =
   ## Lists attached devices
-  c.devices
+  return toSeq(c.devices.values)
 
 proc discoverDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): seq[GDevice] =
   ## Discover Govee devices on Lan.
