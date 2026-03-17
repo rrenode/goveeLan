@@ -1,3 +1,14 @@
+## .. importdoc:: core/arrayutils
+## 
+## Arrays of supported device SKUs concatenated into one array along with some procs 
+## and a magically created string enum from the power of macros.
+## 
+## Taken from [Govee Developer Docs | Supported Product Models](https://developer.govee.com/docs/support-product-model).
+## 
+## [GDEVICES_ENUM] is created using [strEnum].
+## 
+## I don't know what else to write here other than what I already did...
+
 from std/strutils import toUpperAscii, parseEnum
 import ./core/arrayutils
 
@@ -89,7 +100,10 @@ const SERIES_H8XXX = [
     "H80D1"
 ]
 
-const G_SUPPORTED_DEVICES = SERIES_H50XX & SERIES_H51XX & SERIES_H60XX & SERIES_H61XXX & SERIES_H66XX & SERIES_H68XX & SERIES_H70XX & SERIES_H71XX & SERIES_H8XXX
+
+const G_SUPPORTED_DEVICES* = SERIES_H50XX & SERIES_H51XX & SERIES_H60XX & 
+        SERIES_H61XXX & SERIES_H66XX & SERIES_H68XX & SERIES_H70XX & SERIES_H71XX & SERIES_H8XXX ## \
+        ## Concatenated array of all supported device SKUs. Made using [&]
 
 #[Macro Result:
 type

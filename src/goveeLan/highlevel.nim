@@ -1,3 +1,4 @@
+## .. importdoc:: midlevel.nim
 
 import ./[midlevel, gsupport, models]
 
@@ -8,32 +9,40 @@ type
   ##    |-> colorwc     - RGB color setting and temperature (split into two)
   ##    |-> status      - queries device status; getting states of above
 
-  GCommands* = enum
+  GCommands = enum
     gTurn, gBrightness, gColor, gTemp, gStatus
   
-  GCommandData* = object
+  GCommandData = object
     case cmd: GCommands
-    of gTurn: state*: GPowerState
-    of gBrightness: brightness*: GBrightness
-    of gColor: clr*: GColor
-    of gTemp: t*: GTemperature
+    of gTurn: state: GPowerState
+    of gBrightness: brightness: GBrightness
+    of gColor: clr: GColor
+    of gTemp: t: GTemperature
     of gStatus: discard
   
-  ## GDevice is an abstraction of device.
   GDevice* = ref object
+    ## GDevice is the higher level abstraction of GNetDevice.
     model: GDEVICES_ENUM
     macAddress: string
     netDevice: GNetDevice
     attached: bool
     client: GClient
 
-  ## Client's job is to provide a higher level interface for 
-  ##    interacting and controlling Govee devices.
-  ## It's more like a barrier between the midlevel controller 
-  ##    and general use with some convenience built-in.
-  ## Also acts as a sort of base type.
-  ## 
   GClient* = ref object
+    ## **Constructor:** [newGClient]
+    ## 
+    ## Higher level interface of [GController] 
+    ##    interacting and controlling Govee devices.
+    ## 
+    ## 
+    ## | procs                   | desc                              |
+    ## | ----------------------- | --------------------------------- |
+    ## | [discoverDevices]       | Scan the network for devices      |
+    ## | [discoverAttachDevices] | Like avove, but also attaches them to the client |
+    ## | [attachDevice]          | Attach [GDevice] to the client |
+    ## | [attachDevices]         | Attach a seq of [GDevice]'s to client |
+    ## | [listDevices]           | Lists attached devices |
+    ## 
     devices: seq[GDevice]
     controller {. requiresInit.}: GController
 
