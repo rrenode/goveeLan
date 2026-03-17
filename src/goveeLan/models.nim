@@ -1,3 +1,5 @@
+import std/[json]
+
 type
   GPowerState* = enum
     pOff = 0,
@@ -11,6 +13,15 @@ type
     r*: int
     g*: int
     b*: int
+
+proc `%`*(clr: GColor): JsonNode =
+  %*{
+    "color":{
+      "r":clr.r,
+      "g":clr.g,
+      "b":clr.b
+    }
+  }
 
 proc `bool`*(ps: GPowerState): bool =
   case ps:
