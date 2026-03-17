@@ -48,7 +48,6 @@ type
     devices: Table[string, GDevice]
     controller {. requiresInit.}: GController
 
-proc newGDevice(gd: GNetDevice, c: GClient): GDevice
 proc newGDevice(gd: GNetDevice): GDevice
 
 var sharedController: GController
@@ -92,6 +91,19 @@ proc attachDevice*(c: GClient, d: GDevice) =
     d.client = c
     d.attached = true
 
+proc detachDevice*(c: GClient, d: GDevice) =
+  ## Detach the device from its client
+  ## 
+  ## GDevice will lose function.
+  if c.devices.hasKey(d.macAddress):
+    let existing = c.devices[d.macAddress]
+    if existing != d:
+      # A device with the same MAC address already exists... duplicate device!
+      raise newException(ValueError, "Device mismatch!")
+    c.devices.del(d.macAddress)
+    d.attached = false
+    d.client = nil
+
 proc attachDevices*(c: GClient, devices: seq[GDevice]) =
   ## Register many devices in the client.
   for d in devices:
@@ -113,29 +125,24 @@ proc discoverDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): 
 
 proc discoverAttachDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): seq[GDevice] =
   ## Discover Govee devices on Lan and attach them to the client.
-  ## Returns a seq of newly attached devices.
+  ## Returns a seq of the newly attached devices.
   let netDevices = c.controller.discover($skuModel)
   for nd in netDevices:
+    if 
     let d = newGDevice(nd)
     c.attachDevice(d)
     result.add(d)
 
-# GDevice - Constructors
-proc newGDevice(gd: GNetDevice, c: GClient): GDevice =
-  new(result)
-  result.netDevice = gd
-  result.client = c
-
+# GDevice - Constructor
 proc newGDevice(gd: GNetDevice): GDevice =
   new(result)
+  result.model = gd.skuToEnum(gd.sku)
+  result.macAddress = gd.macAddr
   result.netDevice = gd
 
 # GDevice - field getters
 proc model*(d: GDevice): GDEVICES_ENUM =
-  try:
-    skuToEnum(d.netDevice.sku)
-  except ValueError:
-    return GDEVICES_ENUM.UNKNOWN
+  skuToEnum(d.netDevice.sku)
 
 proc macAddress*(d: GDevice): string =
   d.netDevice.macAddr
