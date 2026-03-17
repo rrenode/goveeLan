@@ -1,7 +1,12 @@
-import std/[strutils]
 import ./[midlevel, gsupport, models]
 
 type
+  ## Device commands:
+  ##    |-> turn        - On or off
+  ##    |-> brightness  - value bound from 0 to 100
+  ##    |-> colorwc     - RGB color setting and temperature
+  ##    |-> status      - queries device status; getting states of above
+
   GCommands* = enum
     gTurn, gBrightness, gColorwc, gStatus
   
@@ -11,12 +16,6 @@ type
     of gBrightness: brightness*: GBrightness
     of gColorwc: clr*: GColor
     of gStatus: discard
-
-  ## Device commands:
-  ##    |-> turn        - On or off
-  ##    |-> brightness  - value bound from 0 to 100
-  ##    |-> colorwc     - RGB color setting and temperature
-  ##    |-> status      - queries device status; getting states of above
   
   ## GDevice is an abstraction of device.
   GDevice* = ref object
@@ -43,7 +42,7 @@ var sharedController: GController
 
 proc getSharedController(): GController =
   if sharedController.isNil:
-    sharedController = GController()
+    sharedController = newGController()
   sharedController
 
 proc newGClient*(): GClient =
@@ -136,4 +135,4 @@ proc setBrightness*(d: GDevice, val: GBrightness) =
 
 # GDevice - std compat
 proc `$`*(d: GDevice): string =
-  "GDevice(model=" & $d.model & ", mac=" & d.macAddress & ")"
+  "GDevice(model=" & $d.model & ", mac=" & macAddress(d) & ")"
