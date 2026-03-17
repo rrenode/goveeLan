@@ -115,7 +115,10 @@ strEnum(GDEVICES_ENUM, G_SUPPORTED_DEVICES)
 
 proc skuToEnum*(sku: string): GDEVICES_ENUM =
     var d: GDEVICES_ENUM
-    parseEnum(sku, d)
+    try:
+      parseEnum(sku, d)
+    except ValueError:
+      return GDEVICES_ENUM.UNKNOWN
 
 proc isSupported*(sku: string): bool =
   toUpperAscii(sku) in G_SUPPORTED_DEVICES
