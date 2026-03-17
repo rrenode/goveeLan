@@ -65,10 +65,12 @@
 ## 
 ## See [GDevice] for more with devices.
 ## 
+import goveeLan/[highlevel, models]
+
+export highlevel, models
 
 when isMainModule:
-  # Really just used for development...
-  import goveeLan/[highlevel, models]
+  # Really just used for silly dev testing...
 
   proc cTest() =
     let c = newGClient()
@@ -82,8 +84,3 @@ when isMainModule:
     c.attachDevice(light1)
     echo light1.attached
   cTest()
-
-else:
-  import goveeLan/[highlevel, models]
-
-  export highlevel, models
