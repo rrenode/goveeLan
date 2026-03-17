@@ -109,7 +109,7 @@ proc turn*(ctrl: GController, d: GNetDevice, on: bool) =
       }
     }
   }
-  ctrl.transport.sendToDevice(d.ipAddr, $payload)
+  ctrl.transport.sendToDevice(d.ipAddr, payload)
 
 proc brightness*(ctrl: GController, d: GNetDevice, val: int) =
   ## For brightness, Govee wants an integer bound(0, 100)
@@ -119,4 +119,42 @@ proc brightness*(ctrl: GController, d: GNetDevice, val: int) =
       "data": {"value": val}
     }
   }
-  ctrl.transport.sendToDevice(d.ipAddr, %payload)
+  ctrl.transport.sendToDevice(d.ipAddr, payload)
+
+proc temperature*(ctrl: GController, d: GNetDevice, val: int) =
+  ## Same as color using `colorwc` command, but color is 
+  ##    ignored by Govee when temp is set.
+  ## Govee wants an integer bound(2000, 9000) representing kelvin.
+  let payload = %*{
+      "msg":{
+          "cmd":"colorwc",
+          "data":{
+          "color":{
+              "r":0,
+              "g":0,
+              "b":0
+          },
+          "colorTemInKelvin":val
+          }
+      }
+  }
+  ctrl.transport.sendToDevice(d.ipAddr, payload)
+
+proc color*(ctrl: GController; d: GNetDevice; r, g, b: int) =
+  ## Same as color using `colorwc` command, but color is 
+  ##    ignored by Govee when temp is set.
+  ## Govee wants an integer bound(2000, 9000) representing kelvin.
+  let payload = %*{
+      "msg":{
+          "cmd":"colorwc",
+          "data":{
+          "color":{
+              "r":r,
+              "g":g,
+              "b":b
+          },
+          "colorTemInKelvin":0
+          }
+      }
+  }
+  ctrl.transport.sendToDevice(d.ipAddr, payload)
