@@ -11,5 +11,3 @@ bin = @["goveeLan"]
 # Dependencies
 
 requires "nim >= 2.2.6"
-
-requires "multicast >= 0.1.5"
