@@ -41,10 +41,15 @@ proc sendTo*(
 ) {.tags: [WriteIOEffect].} =
   net.sendTo(g.sock, $ip, Port(port), payload)
 
+proc sendTo*(
+  g: GoveeSocket, ip: string, port: int, payload: JsonNode
+) {.tags: [WriteIOEffect].} =
+  net.sendTo(g.sock, $ip, Port(port), $payload)
+
 proc sendToDevice*[T: string | IpAddress](
   g: GoveeSocket, ip: T, payload: string
 ) {.tags: [WriteIOEffect].} =
-  net.sendTo(g.sock, $ip, Port(G_DEVICE_PORT), $payload)
+  net.sendTo(g.sock, $ip, Port(G_DEVICE_PORT), payload)
 
 proc sendToDevice*[T: string | IpAddress](
   g: GoveeSocket, ip: T, payload: JsonNode
