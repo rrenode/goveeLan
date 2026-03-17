@@ -179,5 +179,9 @@ proc status*(ctrl: GController; d:GNetDevice, timeout_ms: int = 500): JsonNode =
   let n = ctrl.transport.recvFrom(data=data, ip=address, port=port)
   if n <= 0:
     raise newException(IOError, "No response received")
+  
+  if address != d.ipAddr:
+    raise newException(ProtocolError, "Device status request expected response from IP `" &
+                                      d.ipAddr & "` but got a response from `" & address & "`")
 
   result = parseJson(data)
