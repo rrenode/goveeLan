@@ -1,5 +1,5 @@
-import std/[json, times, sequtils]
-from std/net import getPrimaryIPAddr
+import std/[json, times]
+from std/net import getPrimaryIPAddr, `$`
 
 import ./lowlevel
 
@@ -42,7 +42,7 @@ proc newGController*(localIp: string = ""): GController =
   if lanAddr == "":
     lanAddr = $getPrimaryIPAddr()
   new(result)
-  result.transport = newGoveeSocket(localIp)
+  result.transport = newGoveeSocket(lanAddr)
 
 proc newGController*(transport: GoveeSocket): GController =
   ## Use an existing transport socket.
