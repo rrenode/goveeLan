@@ -173,7 +173,7 @@ proc status*(ctrl: GController; d:GNetDevice, timeout_ms: int = 500): JsonNode =
     port = ""
 
   var fds = @[ctrl.transport.getFd()]
-  if selectRead(fds, timeout_ms):
+  if selectRead(fds, timeout_ms) > 0:
     raise newException(IOError, "Timed out waiting for device status response")
 
   let n = ctrl.transport.recvFrom(data=data, ip=address, port=port)
