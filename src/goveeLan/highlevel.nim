@@ -58,9 +58,9 @@ proc dispatch(c: GClient, device: GDevice, data: GCommandData) =
   of gBrightness:
     c.controller.brightness(device.netDevice, data.brightness)
   of gColor:
-    discard
+    c.controller.color(device.netDevice, data.clr.r, data.clr.g, data.clr.b)
   of gTemp:
-    discard
+    c.controller.temperature(device.netDevice, data.t)
   of gStatus:
     discard
 
@@ -135,6 +135,9 @@ proc turnOff*(d: GDevice) =
 
 proc setBrightness*(d: GDevice, val: GBrightness) =
   d.dispatch(GCommandData(cmd: gBrightness, brightness: val))
+
+proc setColor*(d: GDevice, clr: GColor) =
+  d.dispatch(GCommandData(cmd: gColor, clr: clr))
 
 # GDevice - std compat
 proc `$`*(d: GDevice): string =
