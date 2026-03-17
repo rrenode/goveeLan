@@ -121,7 +121,10 @@ proc newGDevice(gd: GNetDevice): GDevice =
 
 # GDevice - field getters
 proc model*(d: GDevice): GDEVICES_ENUM =
-  skuToEnum(d.netDevice.sku)
+  try:
+    skuToEnum(d.netDevice.sku)
+  except ValueError:
+    return GDEVICES_ENUM.UNKNOWN
 
 proc macAddress*(d: GDevice): string =
   d.netDevice.macAddr

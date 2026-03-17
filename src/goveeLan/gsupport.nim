@@ -100,9 +100,10 @@ const SERIES_H8XXX = [
     "H80D1"
 ]
 
+const EXTRAS = ["UNKNOWN"]
 
 const G_SUPPORTED_DEVICES* = SERIES_H50XX & SERIES_H51XX & SERIES_H60XX & 
-        SERIES_H61XXX & SERIES_H66XX & SERIES_H68XX & SERIES_H70XX & SERIES_H71XX & SERIES_H8XXX ## \
+        SERIES_H61XXX & SERIES_H66XX & SERIES_H68XX & SERIES_H70XX & SERIES_H71XX & SERIES_H8XXX & EXTRAS ## \
         ## Concatenated array of all supported device SKUs. Made using [&]
 
 #[Macro Result:
@@ -115,7 +116,6 @@ strEnum(GDEVICES_ENUM, G_SUPPORTED_DEVICES)
 proc skuToEnum*(sku: string): GDEVICES_ENUM =
     var d: GDEVICES_ENUM
     parseEnum(sku, d)
-
 
 proc isSupported*(sku: string): bool =
   toUpperAscii(sku) in G_SUPPORTED_DEVICES
