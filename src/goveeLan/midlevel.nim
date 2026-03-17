@@ -10,7 +10,6 @@ type
     sku*: string
   
   GController* = ref object
-    netDevices*: seq[GNetDevice]
     transport: GoveeSocket
 
 # Contstructors
