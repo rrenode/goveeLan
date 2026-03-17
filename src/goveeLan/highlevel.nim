@@ -128,7 +128,8 @@ proc discoverAttachDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T =
   ## Returns a seq of the newly attached devices.
   let netDevices = c.controller.discover($skuModel)
   for nd in netDevices:
-    if 
+    if not isSupported(nd.sku):
+      continue
     let d = newGDevice(nd)
     c.attachDevice(d)
     result.add(d)
@@ -136,7 +137,7 @@ proc discoverAttachDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T =
 # GDevice - Constructor
 proc newGDevice(gd: GNetDevice): GDevice =
   new(result)
-  result.model = gd.skuToEnum(gd.sku)
+  result.model = skuToEnum(gd.sku)
   result.macAddress = gd.macAddr
   result.netDevice = gd
 
