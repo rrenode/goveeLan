@@ -1,3 +1,4 @@
+
 import ./[midlevel, gsupport, models]
 
 type
@@ -52,6 +53,8 @@ proc newGClient*(): GClient =
   )
 
 proc dispatch(c: GClient, device: GDevice, data: GCommandData) =
+  ## Dispatch command to device and expect no return.
+  ## Status request does nothing here.
   case data.cmd
   of gTurn:
     c.controller.turn(device.netDevice, bool(data.state))
@@ -62,7 +65,7 @@ proc dispatch(c: GClient, device: GDevice, data: GCommandData) =
   of gTemp:
     c.controller.temperature(device.netDevice, data.t)
   of gStatus:
-    discard
+    raise newException(ValueError, "gStatus is a query, not a dispatchable command")
 
 proc attachDevice*(c: GClient, d: GDevice) =
   ## Attach a device to a client
@@ -121,12 +124,18 @@ proc macAddress*(d: GDevice): string =
 proc attached*(d: GDevice): bool =
   not d.client.isNil
 
+proc status*(d: GDevice): GDeviceStatus =
+  if d.client.isNil:
+    raise newException(ValueError, "Device is not attached to a client")
+  let j = d.client.controller.status(d.netDevice)
+  result = j.to(GDeviceStatus)
+
+# GDevice - procs stuffs
 proc dispatch(d: GDevice, data: GCommandData) =
   if d.client.isNil:
     raise newException(ValueError, "Device is not attached to a client")
   d.client.dispatch(d, data)
 
-# GDevice - procs
 proc turnOn*(d: GDevice) =
   d.dispatch(GCommandData(cmd: gTurn, state: pOn))
 
@@ -138,6 +147,9 @@ proc setBrightness*(d: GDevice, val: GBrightness) =
 
 proc setColor*(d: GDevice, clr: GColor) =
   d.dispatch(GCommandData(cmd: gColor, clr: clr))
+
+proc setTemperature*(d: GDevice, temp: GTemperature) =
+  d.dispatch(GCommandData(cmd: gTemp, t: temp))
 
 # GDevice - std compat
 proc `$`*(d: GDevice): string =

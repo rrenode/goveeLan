@@ -74,7 +74,6 @@ proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000)
     address: string = ""
     port: string = ""
   
-  let start = epochTime()
   let deadline = epochTime() + float(timeout_ms) / 1000.0
 
   while epochTime() < deadline:
@@ -83,7 +82,8 @@ proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000)
 
     if selectRead(fds, remainingMs) > 0:
       let n = ctrl.transport.recvFrom(data, address, port)
-      
+      if n <= 0:
+        raise newException(IOError, "No response received")
       let jdata = parseJson(data)
       let sku = jdata["msg"]["data"]["sku"].getStr
       let ip  = jdata["msg"]["data"]["ip"].getStr
@@ -158,3 +158,23 @@ proc color*(ctrl: GController; d: GNetDevice; r, g, b: int) =
       }
   }
   ctrl.transport.sendToDevice(d.ipAddr, payload)
+
+proc status*(ctrl: GController; d:GNetDevice): JsonNode =
+  let payload = %*{
+    "msg": {
+      "cmd": "devStatus",
+      "data": {}
+    }
+  }
+  ctrl.transport.sendToDevice(d.ipAddr, payload)
+
+  var
+    data = ""
+    address = ""
+    port = ""
+
+  let n = ctrl.transport.recvFrom(data=data, ip=address, port=port)
+  if n <= 0:
+    raise newException(IOError, "No response received")
+
+  result = parseJson(data)
