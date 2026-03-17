@@ -4,17 +4,18 @@ type
   ## Device commands:
   ##    |-> turn        - On or off
   ##    |-> brightness  - value bound from 0 to 100
-  ##    |-> colorwc     - RGB color setting and temperature
+  ##    |-> colorwc     - RGB color setting and temperature (split into two)
   ##    |-> status      - queries device status; getting states of above
 
   GCommands* = enum
-    gTurn, gBrightness, gColorwc, gStatus
+    gTurn, gBrightness, gColor, gTemp, gStatus
   
   GCommandData* = object
     case cmd: GCommands
     of gTurn: state*: GPowerState
     of gBrightness: brightness*: GBrightness
-    of gColorwc: clr*: GColor
+    of gColor: clr*: GColor
+    of gTemp: t*: GTemperature
     of gStatus: discard
   
   ## GDevice is an abstraction of device.
@@ -56,7 +57,9 @@ proc dispatch(c: GClient, device: GDevice, data: GCommandData) =
     c.controller.turn(device.netDevice, bool(data.state))
   of gBrightness:
     c.controller.brightness(device.netDevice, data.brightness)
-  of gColorwc:
+  of gColor:
+    discard
+  of gTemp:
     discard
   of gStatus:
     discard
