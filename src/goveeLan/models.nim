@@ -6,7 +6,7 @@ type
   Percent* = range[0..100]
 
   GBrightness* = Percent
-  GTemp* = range[2000..9000]
+  GTemperature* = range[2000..9000]
   GColor* = object
     r*: int
     g*: int
