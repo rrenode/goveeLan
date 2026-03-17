@@ -5,4 +5,4 @@ when withDir(thisDir(), system.fileExists("nimble.paths")):
 # end Nimble config
 
 task bdocs, "Builds docs":
-  exec "nim doc --project --index:on --outdir:docs src/goveeLan.nim"
+  exec "nim doc --project --index:on --outdir:docs --git.url:https://github.com/rrenode/goveeLan --git.commit:main src/goveeLan.nim"
