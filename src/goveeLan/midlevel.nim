@@ -88,6 +88,8 @@ proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000)
       let n = ctrl.transport.recvFrom(data, address, port)
       if n <= 0:
         raise newException(IOError, "No response received")
+      data.setLen(n)
+
       let jdata = parseJson(data)
       let sku = jdata["msg"]["data"]["sku"].getStr
       let ip  = jdata["msg"]["data"]["ip"].getStr
@@ -184,6 +186,7 @@ proc status*(ctrl: GController; d:GNetDevice, timeout_ms: int = 500): JsonNode =
   let n = ctrl.transport.recvFrom(data=data, ip=address, port=port)
   if n <= 0:
     raise newException(IOError, "No response received")
+  data.setLen(n)
   
   if address != d.ipAddr:
     raise newException(ProtocolError, "Device status request expected response from IP `" &
