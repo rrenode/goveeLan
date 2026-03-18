@@ -37,7 +37,7 @@ type
     sock: Socket
     closed: bool = true
 
-proc newGNetClient*(localIp: string): GNetClient {.raises: [ref OSError].} =
+proc newGNetClient*(localIp: string): GNetClient {.raises: [ref ValueError, ref OSError].} =
   new(result)
   try:
     result.sock = newSocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
