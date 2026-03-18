@@ -7,28 +7,6 @@
 ##      
 ##      Commands are sent as unauthenticated UDP JSON to device port 4003 per Govee's LAN docs. 
 ## 
-## # Design Notes
-## 
-##      Communication with the MCAST group versus the devices is technically 
-##          seperate concerns; though related. The Govee device discovery is 
-##          send-reply. All of the device commands, excluding the status 
-##          command, do not send back return data.
-## 
-##      GMulticast Socket
-##        \|- Domain: AF_INET (IPv4)
-##        \|- SockType: SOCK_DGRAM (datagram-oriented communication)
-##        \|- Protocol: IPPROTO_UDP (User ^^^^^^ Protocol)
-##        \|- Is address/port bound
-##        \|- Joins MCast Group (IP_ADD_MEMBERSHIP)
-##        \|- Can send and recieve
-##      
-##      GUnicast Socket
-##        \|- Domain: AF_INET (IPv4)
-##        \|- SockType: SOCK_DGRAM (datagram-oriented communication)
-##        \|- Protocol: IPPROTO_UDP (User ^^^^^^ Protocol)
-##        \|- Is not bound
-##        \|- Doesn't care to join the MCast group
-##        \|- Can send and recieve
 ## 
 ## 
 ## https://github.com/khchen/winim/blob/6fdee629140baa0d7060ddf86662457d11f50d35/winim/inc/winsock.nim#L1090
