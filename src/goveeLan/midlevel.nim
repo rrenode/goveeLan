@@ -13,11 +13,11 @@ type
     sku*: string
   
   GController* = ref object
-    transport: GoveeSocket
+    transport: GNetClient
 
 # Contstructors
 proc newGController*(localIp: string = ""): GController
-proc newGController*(transport: GoveeSocket): GController
+proc newGController*(transport: GNetClient): GController
 
 # GController Procs
 proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000): seq[GNetDevice]
@@ -35,25 +35,25 @@ proc newGController*(localIp: string = ""): GController =
   ## On some platforms, notably Windows, multiple controllers cannot
   ## reliably bind separate sockets to the discovery port (4002) on
   ## the same local IP. In those cases, controllers must share a
-  ## single `GoveeSocket`.
+  ## single `GNetClient`.
   ## 
   ## If you need to share a transport between multiple controllers,
-  ## use `newGController(transport: GoveeSocket)` instead.
+  ## use `newGController(transport: GNetClient)` instead.
   ## 
   var lanAddr = localIp
   if lanAddr == "":
     lanAddr = $getPrimaryIPAddr()
   new(result)
-  result.transport = newGoveeSocket(lanAddr)
+  result.transport = newGNetClient(lanAddr)
 
-proc newGController*(transport: GoveeSocket): GController =
+proc newGController*(transport: GNetClient): GController =
   ## Use an existing transport socket.
   ##
   ## Note:
   ## Govee LAN discovery requires a UDP listener on port 4002.
   ##  If multiple sockets are bound to the same port, the OS may
   ##    deliver packets to only one of them. 
-  ## Sharing a single GoveeSocket between controllers is 
+  ## Sharing a single GNetClient between controllers is 
   ##    therefore recommended.
   ## 
   new(result)
