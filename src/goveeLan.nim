@@ -77,10 +77,6 @@ when isMainModule:
     let ds = c.discoverAttachDevices()
     let light1 = ds[0]
     echo light1
-    echo light1.attached
-    c.detachDevice(light1)
-    echo light1
-    echo light1.attached
-    c.attachDevice(light1)
-    echo light1.attached
+    echo ds[1]
+    echo ds[2]
   cTest()
