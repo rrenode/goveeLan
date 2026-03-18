@@ -1,3 +1,20 @@
+## Transport Layer
+## 
+## .. danger:: 
+##      There was a severe misstep when designing.
+## 
+##      Communication with MCAST and devices is technically seperate concerns.
+## 
+##      Discovery Socket
+##        |- IP_MULTICAST_IF
+##        |- binds to a specific local IP (239.255.255.250::4001)
+##        |- listens 4002
+##        |- short-lived, send + receive burst
+##      
+##      Communication Socket
+##        |- 
+## 
+##
 ## .. danger:: 
 ##      Do not treat this channel as secure against other hosts on the local network.
 ##    
@@ -6,7 +23,10 @@
 ##      Commands are sent as unauthenticated UDP JSON to device port 4003 per Govee's LAN docs. 
 ## 
 
-import std/[net, nativesockets, json, times, winlean, os]
+import std/[net, nativesockets, json, times, os]
+
+when defined(windows):
+  import winlean
 
 const G_MCAST_IP = "239.255.255.250"
 const G_MCAST_PORT = 4001

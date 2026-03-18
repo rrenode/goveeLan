@@ -1,5 +1,8 @@
 ## .. importdoc:: midlevel.nim
-import std/[tables, sequtils]
+## 
+## User Interface
+
+import std/[tables, sequtils, envvars]
 import ./[midlevel, gsupport, models]
 
 type
@@ -210,4 +213,10 @@ proc setTemperature*(d: GDevice, temp: GTemperature) =
 
 # GDevice - std compat
 proc `$`*(d: GDevice): string =
-  "GDevice(model=" & $d.model & ", mac=" & macAddress(d) & ")"
+  when getEnv("G_ECHO_LVL") == "1":
+    "GDevice(model=" & $d.model & 
+    ", mac=" & macAddress(d) &
+    ", GNetDevice=" & $d.netDevice &
+    ")"
+  else:
+    "GDevice(model=" & $d.model & ", mac=" & macAddress(d) & ")"

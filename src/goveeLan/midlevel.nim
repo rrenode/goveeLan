@@ -1,3 +1,6 @@
+## Data/Commands Layer
+##
+
 import std/[json, times]
 from std/net import getPrimaryIPAddr, `$`
 
@@ -185,3 +188,9 @@ proc status*(ctrl: GController; d:GNetDevice, timeout_ms: int = 500): JsonNode =
                                       d.ipAddr & "` but got a response from `" & address & "`")
 
   result = parseJson(data)
+
+# GNetDevice - std compat
+proc `$`*(d: GNetDevice): string =
+  "GNetDevice(macAddr=" & d.macAddr &
+  ", ipAddr=" & d.ipAddr &
+  ", sku=" & d.sku & ")"
