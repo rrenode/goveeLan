@@ -7,12 +7,14 @@ from std/net import getPrimaryIPAddr, `$`
 import ./lowlevel
 
 type
-  GNetDevice* = ref object
+  GNetDevice* = object
+    ## Basically just data holder
     macAddr*: string
     ipAddr*: string
     sku*: string
   
   GController* = ref object
+    ## Handles the JSON associated with commands
     transport: GNetClient
 
 # Contstructors
