@@ -224,7 +224,7 @@ proc setTemperature*(d: GDevice, temp: GTemperature) =
 
 # GDevice - std compat
 proc `$`*(d: GDevice): string =
-  when getEnv("G_ECHO_LVL") == "1":
+  if getEnv("G_ECHO_LVL") == "1":
     "GDevice(model=" & $d.model & 
     ", mac=" & macAddress(d) &
     ", GNetDevice=" & $d.netDevice &
