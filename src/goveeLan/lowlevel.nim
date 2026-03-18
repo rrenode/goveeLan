@@ -1,27 +1,35 @@
 ## Transport Layer
 ## 
 ## .. danger:: 
-##      There was a severe misstep when designing.
-## 
-##      Communication with MCAST and devices is technically seperate concerns.
-## 
-##      Discovery Socket
-##        |- IP_MULTICAST_IF
-##        |- binds to a specific local IP (239.255.255.250::4001)
-##        |- listens 4002
-##        |- short-lived, send + receive burst
-##      
-##      Communication Socket
-##        |- 
-## 
-##
-## .. danger:: 
 ##      Do not treat this channel as secure against other hosts on the local network.
 ##    
 ##      This library uses Govee’s LAN UDP protocol. 
 ##      
 ##      Commands are sent as unauthenticated UDP JSON to device port 4003 per Govee's LAN docs. 
 ## 
+## # Design Notes
+## 
+##      Communication with the MCAST group and devices is technically 
+##          seperate concerns.
+## 
+##      Discovery Socket
+##        \|- Domain: AF_INET (IPv4)
+##        \|- SockType: SOCK_DGRAM (datagram-oriented communication)
+##        \|- Protocol: IPPROTO_UDP (User ^^^^^^ Protocol)
+##        \|- Binds to LISTEN_PORT on local address
+##        \|- Joins MCast Group (IP_ADD_MEMBERSHIP)
+##        \|- Can send and recieve
+##      
+##      Command Socket
+##        \|- Domain: AF_INET (IPv4)
+##        \|- SockType: SOCK_DGRAM (datagram-oriented communication)
+##        \|- Protocol: IPPROTO_UDP (User ^^^^^^ Protocol)
+##        \|- Can send
+## 
+## 
+## https://github.com/khchen/winim/blob/6fdee629140baa0d7060ddf86662457d11f50d35/winim/inc/winsock.nim#L1090
+## https://learn.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
+## https://www.ibm.com/docs/en/aix/7.3.0?topic=sockets-ip-multicasts
 
 import std/[net, nativesockets, json, times, os]
 
