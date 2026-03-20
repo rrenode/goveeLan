@@ -1,20 +1,25 @@
+## Data/Commands Layer
+##
+
 import std/[json, times]
 from std/net import getPrimaryIPAddr, `$`
 
 import ./lowlevel
 
 type
-  GNetDevice* = ref object
+  GNetDevice* = object
+    ## Basically just data holder
     macAddr*: string
     ipAddr*: string
     sku*: string
   
   GController* = ref object
-    transport: GoveeSocket
+    ## Handles the JSON associated with commands
+    transport: GNetClient
 
 # Contstructors
 proc newGController*(localIp: string = ""): GController
-proc newGController*(transport: GoveeSocket): GController
+proc newGController*(transport: GNetClient): GController
 
 # GController Procs
 proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000): seq[GNetDevice]
@@ -32,25 +37,25 @@ proc newGController*(localIp: string = ""): GController =
   ## On some platforms, notably Windows, multiple controllers cannot
   ## reliably bind separate sockets to the discovery port (4002) on
   ## the same local IP. In those cases, controllers must share a
-  ## single `GoveeSocket`.
+  ## single `GNetClient`.
   ## 
   ## If you need to share a transport between multiple controllers,
-  ## use `newGController(transport: GoveeSocket)` instead.
+  ## use `newGController(transport: GNetClient)` instead.
   ## 
   var lanAddr = localIp
   if lanAddr == "":
     lanAddr = $getPrimaryIPAddr()
   new(result)
-  result.transport = newGoveeSocket(lanAddr)
+  result.transport = newGNetClient(lanAddr)
 
-proc newGController*(transport: GoveeSocket): GController =
+proc newGController*(transport: GNetClient): GController =
   ## Use an existing transport socket.
   ##
   ## Note:
   ## Govee LAN discovery requires a UDP listener on port 4002.
   ##  If multiple sockets are bound to the same port, the OS may
   ##    deliver packets to only one of them. 
-  ## Sharing a single GoveeSocket between controllers is 
+  ## Sharing a single GNetClient between controllers is 
   ##    therefore recommended.
   ## 
   new(result)
@@ -83,6 +88,8 @@ proc discover*(ctrl: GController, skuModel: string = "", timeout_ms: int = 5000)
       let n = ctrl.transport.recvFrom(data, address, port)
       if n <= 0:
         raise newException(IOError, "No response received")
+      data.setLen(n)
+
       let jdata = parseJson(data)
       let sku = jdata["msg"]["data"]["sku"].getStr
       let ip  = jdata["msg"]["data"]["ip"].getStr
@@ -179,9 +186,16 @@ proc status*(ctrl: GController; d:GNetDevice, timeout_ms: int = 500): JsonNode =
   let n = ctrl.transport.recvFrom(data=data, ip=address, port=port)
   if n <= 0:
     raise newException(IOError, "No response received")
+  data.setLen(n)
   
   if address != d.ipAddr:
     raise newException(ProtocolError, "Device status request expected response from IP `" &
                                       d.ipAddr & "` but got a response from `" & address & "`")
 
   result = parseJson(data)
+
+# GNetDevice - std compat
+proc `$`*(d: GNetDevice): string =
+  "GNetDevice(macAddr=" & d.macAddr &
+  ", ipAddr=" & d.ipAddr &
+  ", sku=" & d.sku & ")"

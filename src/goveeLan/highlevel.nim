@@ -1,5 +1,8 @@
 ## .. importdoc:: midlevel.nim
-import std/[tables, sequtils]
+## 
+## User Interface
+
+import std/[tables, sequtils, envvars]
 import ./[midlevel, gsupport, models]
 
 type
@@ -82,12 +85,23 @@ proc getSharedController(): GController =
   sharedController
 
 proc newGClient*(): GClient =
+  ## Creates a GClient using the module singleton (sharedController).
+  ## 
+  ## Easiest and recommended use with the lib.
+  ## 
+  ## Use [newIsolatedGClient] if you want more control of net.
+  ## 
   result = GClient(
     devices: initTable[string, GDevice](),
     controller: getSharedController()
   )
 
 proc newIsolatedGClient*(controller: GController): GClient =
+  ## Creates a GClient using the given [GController].
+  ## 
+  ## Not recommended unless you know what you're doing.
+  ## 
+  ## See [GController]'s implementation.
   result = GClient(
     devices: initTable[string, GDevice](),
     controller: controller
@@ -210,4 +224,10 @@ proc setTemperature*(d: GDevice, temp: GTemperature) =
 
 # GDevice - std compat
 proc `$`*(d: GDevice): string =
-  "GDevice(model=" & $d.model & ", mac=" & macAddress(d) & ")"
+  if getEnv("G_ECHO_LVL") == "1":
+    "GDevice(model=" & $d.model & 
+    ", mac=" & macAddress(d) &
+    ", GNetDevice=" & $d.netDevice &
+    ")"
+  else:
+    "GDevice(model=" & $d.model & ", mac=" & macAddress(d) & ")"

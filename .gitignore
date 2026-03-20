@@ -1,6 +1,7 @@
 *.exe
 bin/*
 local/*
+local.nims
 nimble.develop
 nimble.paths
 nimbledeps
