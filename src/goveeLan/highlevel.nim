@@ -2,7 +2,7 @@
 ## 
 ## User Interface
 
-import std/[tables, sequtils, envvars]
+import std/[tables, sequtils, envvars, json]
 import ./[midlevel, gsupport, models]
 
 type
@@ -222,6 +222,9 @@ proc setColor*(d: GDevice, clr: GColor) =
 proc setTemperature*(d: GDevice, temp: GTemperature) =
   d.dispatch(GCommandData(cmd: gTemp, t: temp))
 
+proc cacheDevices*(d: GDevice, saveDir: string) =
+  discard
+
 # GDevice - std compat
 proc `$`*(d: GDevice): string =
   if getEnv("G_ECHO_LVL") == "1":
@@ -231,3 +234,22 @@ proc `$`*(d: GDevice): string =
     ")"
   else:
     "GDevice(model=" & $d.model & ", mac=" & macAddress(d) & ")"
+
+proc devicesToJson(devices: seq[GDevice]): JsonNode =
+  result = newJObject()
+  for d in devices:
+    result[d.macAddress] = %*{
+      "model": $d.model,
+      "ip": d.netDevice.ipAddr
+    }
+  
+proc devicesFromJson(j: JsonNode): seq[GDevice] =
+  for mac, node in j:
+    var d: GDevice
+    let modelStr = node["model"].getStr
+    d.macAddress = mac
+    d.model = skuToEnum(modelStr)
+    d.netDevice.ipAddr = node["ip"].getStr
+    d.netDevice.macAddr = mac
+    d.netDevice.sku = modelStr
+    result.add d
