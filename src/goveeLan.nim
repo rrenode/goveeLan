@@ -66,7 +66,7 @@
 ## See [GDevice] for more with devices.
 ##
 import goveeLan/[highlevel, models]
-
+import json, streams
 export highlevel, models
 
 when isMainModule:
@@ -77,4 +77,8 @@ when isMainModule:
     let ds = c.discoverAttachDevices()
     let light1 = ds[0]
     light1.turnOff()
+    echo light1
+    let jd = devicesToJson(ds)
+    writeFile("devices.json", $jd)
+
   cTest()
