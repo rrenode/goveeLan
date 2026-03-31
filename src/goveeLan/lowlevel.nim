@@ -41,7 +41,6 @@ proc newGNetClient*(localIp: string): GNetClient {.raises: [ref ValueError, ref 
   new(result)
   try:
     result.sock = newSocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
-    result.sock.setSockOpt(OptReuseAddr, true)
     result.sock.bindAddr(Port(G_LISTEN_PORT), localIp)
   except OSError as e:
     raise newException(OSError,
