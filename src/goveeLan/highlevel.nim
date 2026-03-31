@@ -157,6 +157,11 @@ proc listDevices*(c: GClient): seq[GDevice] =
   ## Lists attached devices
   return toSeq(c.devices.values)
 
+proc getAttachedDevice*(c: GClient, mac: string): GDevice =
+  if not c.devices.hasKey(mac):
+    raise newException(ValueError, "GDevice with mac `" & mac & "` not found.")
+  return c.devices[mac]
+
 proc discoverDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): seq[GDevice] =
   ## Discover Govee devices on Lan.
   ## 
@@ -235,15 +240,15 @@ proc `$`*(d: GDevice): string =
   else:
     "GDevice(model=" & $d.model & ", mac=" & macAddress(d) & ")"
 
-proc devicesToJson(devices: seq[GDevice]): JsonNode =
+proc devicesToJson*(devices: seq[GDevice]): JsonNode =
   result = newJObject()
   for d in devices:
     result[d.macAddress] = %*{
       "model": $d.model,
       "ip": d.netDevice.ipAddr
     }
-  
-proc devicesFromJson(j: JsonNode): seq[GDevice] =
+
+proc devicesFromJson*(j: JsonNode): seq[GDevice] =
   for mac, node in j:
     var d: GDevice
     let modelStr = node["model"].getStr
