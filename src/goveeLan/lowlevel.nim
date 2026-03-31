@@ -29,6 +29,7 @@ else:
 
 type
   AddressInUseError* = object of CatchableError
+    ProtocolError* = object of CatchableError
 
 type
   GNetClient* = ref object
