@@ -175,9 +175,12 @@ proc discoverDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): 
 proc discoverAttachDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): seq[GDevice] =
   ## Discover Govee devices on Lan and attach them to the client.
   ## Returns a seq of the newly attached devices.
+  ## Skipping refs already attached.
   let netDevices = c.controller.discover($skuModel)
   for nd in netDevices:
     if not isSupported(nd.sku):
+      continue
+    if c.devices.hasKey(nd.macAddr):
       continue
     let d = newGDevice(nd)
     c.attachDevice(d)
