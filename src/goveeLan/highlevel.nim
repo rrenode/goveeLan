@@ -157,6 +157,9 @@ proc listDevices*(c: GClient): seq[GDevice] =
   ## Lists attached devices
   return toSeq(c.devices.values)
 
+proc devices*(c: GClient): seq[GDevice] =
+  return c.listDevices
+
 proc getAttachedDevice*(c: GClient, mac: string): GDevice =
   if not c.devices.hasKey(mac):
     raise newException(ValueError, "GDevice with mac `" & mac & "` not found.")
