@@ -14,6 +14,7 @@ type
 
   GTemperature* = range[2000..9000]
   GColor* = object
+    ## An RGB color
     r*: range[0..255]
     g*: range[0..255]
     b*: range[0..255]

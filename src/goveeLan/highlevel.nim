@@ -2,7 +2,7 @@
 ## 
 ## User Interface
 
-import std/[tables, sequtils, envvars]
+import std/[tables, sequtils, envvars, json]
 import ./[midlevel, gsupport, models]
 
 type
@@ -75,7 +75,7 @@ type
     devices: Table[string, GDevice]
     controller {. requiresInit.}: GController
 
-proc newGDevice(gd: GNetDevice): GDevice
+proc newGDevice*(gd: GNetDevice): GDevice
 
 var sharedController: GController
 
@@ -157,6 +157,11 @@ proc listDevices*(c: GClient): seq[GDevice] =
   ## Lists attached devices
   return toSeq(c.devices.values)
 
+proc getAttachedDevice*(c: GClient, mac: string): GDevice =
+  if not c.devices.hasKey(mac):
+    raise newException(ValueError, "GDevice with mac `" & mac & "` not found.")
+  return c.devices[mac]
+
 proc discoverDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): seq[GDevice] =
   ## Discover Govee devices on Lan.
   ## 
@@ -170,16 +175,19 @@ proc discoverDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): 
 proc discoverAttachDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T = ""): seq[GDevice] =
   ## Discover Govee devices on Lan and attach them to the client.
   ## Returns a seq of the newly attached devices.
+  ## Skipping refs already attached.
   let netDevices = c.controller.discover($skuModel)
   for nd in netDevices:
     if not isSupported(nd.sku):
+      continue
+    if c.devices.hasKey(nd.macAddr):
       continue
     let d = newGDevice(nd)
     c.attachDevice(d)
     result.add(d)
 
 # GDevice - Constructor
-proc newGDevice(gd: GNetDevice): GDevice =
+proc newGDevice*(gd: GNetDevice): GDevice =
   new(result)
   result.model = skuToEnum(gd.sku)
   result.macAddress = gd.macAddr
@@ -222,6 +230,9 @@ proc setColor*(d: GDevice, clr: GColor) =
 proc setTemperature*(d: GDevice, temp: GTemperature) =
   d.dispatch(GCommandData(cmd: gTemp, t: temp))
 
+proc cacheDevices*(d: GDevice, saveDir: string) =
+  discard
+
 # GDevice - std compat
 proc `$`*(d: GDevice): string =
   if getEnv("G_ECHO_LVL") == "1":
@@ -231,3 +242,22 @@ proc `$`*(d: GDevice): string =
     ")"
   else:
     "GDevice(model=" & $d.model & ", mac=" & macAddress(d) & ")"
+
+proc devicesToJson*(devices: seq[GDevice]): JsonNode =
+  result = newJObject()
+  for d in devices:
+    result[d.macAddress] = %*{
+      "model": $d.model,
+      "ip": d.netDevice.ipAddr
+    }
+
+proc devicesFromJson*(j: JsonNode): seq[GDevice] =
+  for mac, node in j:
+    var d: GDevice
+    let modelStr = node["model"].getStr
+    d.macAddress = mac
+    d.model = skuToEnum(modelStr)
+    d.netDevice.ipAddr = node["ip"].getStr
+    d.netDevice.macAddr = mac
+    d.netDevice.sku = modelStr
+    result.add d

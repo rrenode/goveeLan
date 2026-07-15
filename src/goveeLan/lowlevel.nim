@@ -21,9 +21,17 @@ const G_MCAST_PORT = 4001
 const G_LISTEN_PORT = 4002
 const G_DEVICE_PORT = 4003
 
+when defined(windows):
+  from winlean import WSAEADDRINUSE
+  const addrInUseCode = WSAEADDRINUSE
+else:
+  const addrInUseCode = OSErrorCode.EADDRINUSE
+
 type
+  AddressInUseError* = object of CatchableError
   ProtocolError* = object of CatchableError
 
+type
   GNetClient* = ref object
     ## An IPv4 UDP socket wrapper for communicating with Govee devices
     ##    and sending to the Govee multicast group.
@@ -37,15 +45,18 @@ type
     sock: Socket
     closed: bool = true
 
-proc newGNetClient*(localIp: string): GNetClient {.raises: [ref ValueError, ref OSError].} =
+proc newGNetClient*(localIp: string): GNetClient {.raises: [ref ValueError, ref OSError, ref AddressInUseError].} =
   new(result)
   try:
     result.sock = newSocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
-    result.sock.setSockOpt(OptReuseAddr, true)
     result.sock.bindAddr(Port(G_LISTEN_PORT), localIp)
   except OSError as e:
-    raise newException(OSError,
-      "newGNetClient failed for " & localIp & ":" & $G_LISTEN_PORT & ": " & e.msg)
+    if e.errorCode == addrInUseCode:
+      raise newException(AddressInUseError,
+        "UDP bind failed: " & localIp & ":" & $G_LISTEN_PORT & " is already in use", e)
+    else:
+      raise newException(OSError,
+        "UDP bind failed for " & localIp & ":" & $G_LISTEN_PORT & " (" & e.msg & ")", e)
 
 proc close*(c: GNetClient) =
   if c != nil and not c.closed:

@@ -6,6 +6,8 @@ from std/net import getPrimaryIPAddr, `$`
 
 import ./lowlevel
 
+export AddressInUseError, ProtocolError
+
 type
   GNetDevice* = object
     ## Basically just data holder

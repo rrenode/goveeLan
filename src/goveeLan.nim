@@ -66,15 +66,29 @@
 ## See [GDevice] for more with devices.
 ##
 import goveeLan/[highlevel, models]
-
 export highlevel, models
 
 when isMainModule:
-  # Really just used for silly dev testing...
-
+  import json
+  
+  # Really just used for silly dev testing but also example...
   proc cTest() =
+    # Create our client
     let c = newGClient()
+
+    # Auto discover and attach devices on network
     let ds = c.discoverAttachDevices()
+    
+    # Wanna see their mac addresses?
+    for d in ds:
+      echo d.macAddress
+    
+    # Look! A single light!
     let light1 = ds[0]
-    light1.turnOff()
+    echo light1.macAddress
+    light1.setColor(GColor(r:155, g:102, b:102))
+    
+    let jd = devicesToJson(ds)
+    writeFile("devices.json", $jd)
+
   cTest()
