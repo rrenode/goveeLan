@@ -1,0 +1,22 @@
+nimTitle	lowlevel	goveeLan/lowlevel.html	module src/goveeLan/lowlevel		0
+nim	AddressInUseError	goveeLan/lowlevel.html#AddressInUseError	object AddressInUseError		31
+nim	ProtocolError	goveeLan/lowlevel.html#ProtocolError	object ProtocolError		32
+nim	GNetClient	goveeLan/lowlevel.html#GNetClient	type GNetClient		35
+nim	newGNetClient	goveeLan/lowlevel.html#newGNetClient,string	proc newGNetClient(localIp: string): GNetClient		48
+nim	close	goveeLan/lowlevel.html#close,GNetClient	proc close(c: GNetClient)		61
+nim	sendTo	goveeLan/lowlevel.html#sendTo,GNetClient,string,int,string	proc sendTo(g: GNetClient; ip: string; port: int; payload: string)		66
+nim	sendTo	goveeLan/lowlevel.html#sendTo,GNetClient,string,int,JsonNode	proc sendTo(g: GNetClient; ip: string; port: int; payload: JsonNode)		71
+nim	sendToDevice	goveeLan/lowlevel.html#sendToDevice,GNetClient,T,string	proc sendToDevice[T: string | IpAddress](g: GNetClient; ip: T; payload: string)		76
+nim	sendToDevice	goveeLan/lowlevel.html#sendToDevice,GNetClient,T,JsonNode	proc sendToDevice[T: string | IpAddress](g: GNetClient; ip: T; payload: JsonNode)		81
+nim	sendMCast	goveeLan/lowlevel.html#sendMCast,GNetClient,string	proc sendMCast(g: GNetClient; payload: string)		86
+nim	sendMCast	goveeLan/lowlevel.html#sendMCast,GNetClient,JsonNode	proc sendMCast(g: GNetClient; payload: JsonNode)		89
+nim	recvFrom	goveeLan/lowlevel.html#recvFrom,GNetClient,string,string,Port	proc recvFrom(g: GNetClient; data: var string; ip: var string; port: var Port): int		92
+nim	recvFrom	goveeLan/lowlevel.html#recvFrom,GNetClient,string,string,string	proc recvFrom(g: GNetClient; data: var string; ip: var string; port: var string): int		95
+nim	getFd	goveeLan/lowlevel.html#getFd,GNetClient	proc getFd(g: GNetClient): SocketHandle		101
+nim	selectRead	goveeLan/lowlevel.html#selectRead,seq[SocketHandle],int	proc selectRead(readfds: var seq[SocketHandle]; timeout = 500): int		104
+nim	selectRead	goveeLan/lowlevel.html#selectRead,GNetClient,int	proc selectRead(g: GNetClient; timeout = 500): int		107
+nimgrp	recvfrom	goveeLan/lowlevel.html#recvFrom-procs-all	proc		92
+nimgrp	sendtodevice	goveeLan/lowlevel.html#sendToDevice-procs-all	proc		76
+nimgrp	sendmcast	goveeLan/lowlevel.html#sendMCast-procs-all	proc		86
+nimgrp	selectread	goveeLan/lowlevel.html#selectRead-procs-all	proc		104
+nimgrp	sendto	goveeLan/lowlevel.html#sendTo-procs-all	proc		66

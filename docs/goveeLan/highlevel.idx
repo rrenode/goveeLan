@@ -1,0 +1,27 @@
+nimTitle	highlevel	goveeLan/highlevel.html	module src/goveeLan/highlevel		0
+nim	GDevice	goveeLan/highlevel.html#GDevice	type GDevice		26
+nim	GClient	goveeLan/highlevel.html#GClient	type GClient		34
+nim	newGDevice	goveeLan/highlevel.html#newGDevice,GNetDevice	proc newGDevice(gd: GNetDevice): GDevice		78
+nim	newGClient	goveeLan/highlevel.html#newGClient	proc newGClient(): GClient		87
+nim	newIsolatedGClient	goveeLan/highlevel.html#newIsolatedGClient,GController	proc newIsolatedGClient(controller: GController): GClient		99
+nim	attachDevice	goveeLan/highlevel.html#attachDevice,GClient,GDevice	proc attachDevice(c: GClient; d: GDevice)		125
+nim	detachDevice	goveeLan/highlevel.html#detachDevice,GClient,GDevice	proc detachDevice(c: GClient; d: GDevice)		138
+nim	attachDevices	goveeLan/highlevel.html#attachDevices,GClient,seq[GDevice]	proc attachDevices(c: GClient; devices: seq[GDevice])		151
+nim	listDevices	goveeLan/highlevel.html#listDevices,GClient	proc listDevices(c: GClient): seq[GDevice]		156
+nim	devices	goveeLan/highlevel.html#devices,GClient	proc devices(c: GClient): seq[GDevice]		160
+nim	getAttachedDevice	goveeLan/highlevel.html#getAttachedDevice,GClient,string	proc getAttachedDevice(c: GClient; mac: string): GDevice		163
+nim	discoverDevices	goveeLan/highlevel.html#discoverDevices,GClient,T	proc discoverDevices[T: string | GDEVICES_ENUM](c: GClient; skuModel: T = ""): seq[\n    GDevice]		168
+nim	discoverAttachDevices	goveeLan/highlevel.html#discoverAttachDevices,GClient,T	proc discoverAttachDevices[T: string | GDEVICES_ENUM](c: GClient; skuModel: T = ""): seq[\n    GDevice]		178
+nim	model	goveeLan/highlevel.html#model,GDevice	proc model(d: GDevice): GDEVICES_ENUM		200
+nim	macAddress	goveeLan/highlevel.html#macAddress,GDevice	proc macAddress(d: GDevice): string		203
+nim	attached	goveeLan/highlevel.html#attached,GDevice	proc attached(d: GDevice): bool		206
+nim	status	goveeLan/highlevel.html#status,GDevice	proc status(d: GDevice): GDeviceStatus		209
+nim	turnOn	goveeLan/highlevel.html#turnOn,GDevice	proc turnOn(d: GDevice)		221
+nim	turnOff	goveeLan/highlevel.html#turnOff,GDevice	proc turnOff(d: GDevice)		224
+nim	setBrightness	goveeLan/highlevel.html#setBrightness,GDevice,GBrightness	proc setBrightness(d: GDevice; val: GBrightness)		227
+nim	setColor	goveeLan/highlevel.html#setColor,GDevice,GColor	proc setColor(d: GDevice; clr: GColor)		230
+nim	setTemperature	goveeLan/highlevel.html#setTemperature,GDevice,GTemperature	proc setTemperature(d: GDevice; temp: GTemperature)		233
+nim	cacheDevices	goveeLan/highlevel.html#cacheDevices,GDevice,string	proc cacheDevices(d: GDevice; saveDir: string)		236
+nim	`$`	goveeLan/highlevel.html#$,GDevice	proc `$`(d: GDevice): string		240
+nim	devicesToJson	goveeLan/highlevel.html#devicesToJson,seq[GDevice]	proc devicesToJson(devices: seq[GDevice]): JsonNode		249
+nim	devicesFromJson	goveeLan/highlevel.html#devicesFromJson,JsonNode	proc devicesFromJson(j: JsonNode): seq[GDevice]		257

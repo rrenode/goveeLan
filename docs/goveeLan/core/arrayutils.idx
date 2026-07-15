@@ -1,0 +1,3 @@
+nimTitle	arrayutils	goveeLan/core/arrayutils.html	module src/goveeLan/core/arrayutils		0
+nim	`&`	goveeLan/core/arrayutils.html#&,array[al,T],array[bl,T]	proc `&`[T; al, bl: static[int]](a: array[al, T]; b: array[bl, T]): array[al + bl, T]		3
+nim	strEnum	goveeLan/core/arrayutils.html#strEnum.m,untyped,staticopenArray[string]	macro strEnum(name: untyped; vals: static openArray[string]): untyped		8
