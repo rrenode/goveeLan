@@ -75,7 +75,7 @@ type
     devices: Table[string, GDevice]
     controller {. requiresInit.}: GController
 
-proc newGDevice(gd: GNetDevice): GDevice
+proc newGDevice*(gd: GNetDevice): GDevice
 
 var sharedController: GController
 
@@ -187,7 +187,7 @@ proc discoverAttachDevices*[T: string | GDEVICES_ENUM](c: GClient, skuModel: T =
     result.add(d)
 
 # GDevice - Constructor
-proc newGDevice(gd: GNetDevice): GDevice =
+proc newGDevice*(gd: GNetDevice): GDevice =
   new(result)
   result.model = skuToEnum(gd.sku)
   result.macAddress = gd.macAddr
