@@ -1,0 +1,18 @@
+nimTitle	models	goveeLan/models.html	module src/goveeLan/models		0
+nim	pOff	goveeLan/models.html#pOff	GPowerState.pOff		4
+nim	pOn	goveeLan/models.html#pOn	GPowerState.pOn		4
+nim	GPowerState	goveeLan/models.html#GPowerState	enum GPowerState		4
+nim	Percent	goveeLan/models.html#Percent	type Percent		8
+nim	GBrightness	goveeLan/models.html#GBrightness	type GBrightness		10
+nim	cmRgb	goveeLan/models.html#cmRgb	GColorMode.cmRgb		12
+nim	cmWhite	goveeLan/models.html#cmWhite	GColorMode.cmWhite		12
+nim	GColorMode	goveeLan/models.html#GColorMode	enum GColorMode		12
+nim	GTemperature	goveeLan/models.html#GTemperature	type GTemperature		15
+nim	GColor	goveeLan/models.html#GColor	object GColor		16
+nim	GColorWc	goveeLan/models.html#GColorWc	object GColorWc		22
+nim	GDeviceStatus	goveeLan/models.html#GDeviceStatus	object GDeviceStatus		29
+nim	`%`	goveeLan/models.html#%,GColor	proc `%`(clr: GColor): JsonNode		34
+nim	bool	goveeLan/models.html#bool,GPowerState	proc bool(ps: GPowerState): bool		43
+nim	to	goveeLan/models.html#to,JsonNode,typedesc[GColor]	proc to(j: JsonNode; _: typedesc[GColor]): GColor		48
+nim	to	goveeLan/models.html#to,JsonNode,typedesc[GDeviceStatus]	proc to(j: JsonNode; _: typedesc[GDeviceStatus]): GDeviceStatus		59
+nimgrp	to	goveeLan/models.html#to-procs-all	proc		48

@@ -1,0 +1,13 @@
+nimTitle	midlevel	goveeLan/midlevel.html	module src/goveeLan/midlevel		0
+nim	GNetDevice	goveeLan/midlevel.html#GNetDevice	object GNetDevice		12
+nim	GController	goveeLan/midlevel.html#GController	type GController		18
+nim	newGController	goveeLan/midlevel.html#newGController,string	proc newGController(localIp: string = ""): GController		23
+nim	newGController	goveeLan/midlevel.html#newGController,GNetClient	proc newGController(transport: GNetClient): GController		24
+nim	discover	goveeLan/midlevel.html#discover,GController,string,int	proc discover(ctrl: GController; skuModel: string = ""; timeout_ms: int = 5000): seq[\n    GNetDevice]		27
+nim	turn	goveeLan/midlevel.html#turn,GController,GNetDevice,bool	proc turn(ctrl: GController; d: GNetDevice; on: bool)		29
+nim	brightness	goveeLan/midlevel.html#brightness,GController,GNetDevice,int	proc brightness(ctrl: GController; d: GNetDevice; val: int)		30
+nim	temperature	goveeLan/midlevel.html#temperature,GController,GNetDevice,int	proc temperature(ctrl: GController; d: GNetDevice; val: int)		132
+nim	color	goveeLan/midlevel.html#color,GController,GNetDevice,int,int,int	proc color(ctrl: GController; d: GNetDevice; r, g, b: int)		151
+nim	status	goveeLan/midlevel.html#status,GController,GNetDevice,int	proc status(ctrl: GController; d: GNetDevice; timeout_ms: int = 500): JsonNode		170
+nim	`$`	goveeLan/midlevel.html#$,GNetDevice	proc `$`(d: GNetDevice): string		200
+nimgrp	newgcontroller	goveeLan/midlevel.html#newGController-procs-all	proc		23
