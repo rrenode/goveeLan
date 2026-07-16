@@ -5,6 +5,7 @@ author        = "im_rob"
 description   = "A new thing to exist"
 license       = "MIT"
 srcDir        = "src"
+installExt    = @["nim"]
 bin = @["goveeLan"]
 
 
